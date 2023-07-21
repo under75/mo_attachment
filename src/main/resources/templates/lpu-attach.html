@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<title
+	th:text="${@environment.getProperty('app.name')} + ' - Учетное прикрепление застрахованных на других территориях'"></title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+</head>
+<body>
+	<div class="container">
+		<div th:insert="menu :: navbar"></div>
+		<h4 th:text="${lpu.name}"></h4>
+		<ul class="nav nav-tabs">
+			<li class="nav-item"><a class="nav-link" href="/lpu/ferzl">Поиск
+					персоны в ФЕРЗЛ</a></li>
+			<li class="nav-item"><a class="nav-link active"
+				aria-current="page" href="#">Ввод информации о прикреплении</a></li>
+			<li class="nav-item"><a class="nav-link" href="#">Прикрепленные
+					персоны</a></li>
+		</ul>
+		<form th:method="POST" th:action="@{/lpu/attach}" id="attachForm">
+			<input type="hidden" name="rid" th:value="${rid}" /> <input
+				type="hidden" name="rgaddr" /><input type="hidden" name="cntnr" /><input type="hidden" name="nrdudl" />
+			<div class="row">
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="lastName">Фамилия
+						</label> <input type="text" th:value="${person.lastName}" id="lastName"
+							class="form-control form-control-sm" disabled />
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="firstName">Имя
+						</label> <input type="text" th:value="${person.firstName}" id="firstName"
+							class="form-control form-control-sm" disabled />
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="patronymic">Отчество</label>
+						<input type="text" th:value="${person.patronymic}" id="patronymic"
+							class="form-control form-control-sm" disabled />
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="birthDay">Дата
+							рождения</label><input type="text"
+							th:value="${#temporals.format(person.birthDay, 'dd.MM.yyyy')}"
+							id="birthDay" class="form-control form-control-sm" disabled />
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="pcyOkato">Территория
+							страхования</label> <input type="text" id="pcyOkato"
+							th:value="${policy.okato != null ? policy.okato.title : ''}"
+							class="form-control form-control-sm" disabled />
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="pcyType">Тип
+							полиса</label> <input type="text" id="policyType"
+							th:value="${policy.pcyType != null ? policyTypes.get(policy.pcyType) : ''}"
+							class="form-control form-control-sm" disabled />
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="policySer">Серия
+							полиса</label> <input type="text" th:value="${policy.pcySer}"
+							id="policySer" class="form-control form-control-sm" disabled />
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="policyNum">Номер
+							полиса / ЕНП</label> <input type="text"
+							th:value="${policy.enp != null ? policy.enp : policy.pcyNum}"
+							id="policyNum" class="form-control form-control-sm" disabled />
+					</div>
+				</div>
+			</div>
+			<div class="row" th:if="${attach != null && attach.lpu != null}">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="lpuNotSar">Прикреплен
+							к медицинской организации / подразделению</label> <input type="text"
+							th:value="${attach.lpu.name}"
+							id="lpuNotSar" class="form-control form-control-sm" disabled />
+					</div>
+				</div>
+			</div>
+			<hr />
+			<div class="row">
+				<div class="col-sm">
+					<table class="table table-sm caption-top" th:if="${contacts.size > 0}">
+						<caption class="small">Выбор контактной информации из ФЕРЗЛ</caption>
+						<thead class="table-light">
+							<tr class="small">
+								<th>Тип контакта</th>
+								<th>Текст контакта</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="small" th:each="contact, iStat : ${contacts}">
+								<td th:text="${contact.contactType}"></td>
+								<td th:text="${contact.contactText}"></td>
+								<td><button th:id="'cnt'+${contact.nr}"
+											class="btn btn-sm btn-primary"
+											style="--bs-btn-padding-y: .0rem; --bs-btn-padding-x: .25rem; --bs-btn-font-size: .65rem;"
+											type="button" th:onclick="|initContactByNr(${contact.nr})|">Выбрать</button></td>
+							<tr />
+						</tbody>
+					</table>
+					<div class="row">
+						<div class="col-sm">
+							<div class="form-group">
+								<label class="col-form-label col-form-label-sm" for="phone">Телефон</label><input type="text" class="form-control form-control-sm" th:field="*{formParams.phone}" th:classappend="${#fields.hasErrors('formParams.phone')} ? 'is-invalid' : ''"/>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="form-group">
+								<label class="col-form-label col-form-label-sm" for="email">Email</label><input type="text" class="form-control form-control-sm" th:field="*{formParams.email}" th:classappend="${#fields.hasErrors('formParams.email')} ? 'is-invalid' : ''"/>
+							</div>
+						</div>
+					</div>
+					<table class="table table-sm caption-top" th:if="${rgAddresses.size > 0}">
+						<caption class="small">Выбор адреса регистрации по дате регистрации из ФЕРЗЛ</caption>
+						<thead class="table-light">
+							<tr class="small">
+								<th>Дата регистрации</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="small" th:each="rgaddr, iStat : ${rgAddresses}">
+								<td
+									th:text="'Регистрация ' + ${rgaddr.addressDateB != null ? #temporals.format(rgaddr.addressDateB,'dd.MM.yyyy') : '???'}"></td>
+								<td><button th:id="'rgaddr'+${rgaddr.nr}"
+										class="btn btn-sm btn-primary"
+										style="--bs-btn-padding-y: .0rem; --bs-btn-padding-x: .25rem; --bs-btn-font-size: .65rem;"
+										type="button" th:onclick="|initGarByRgaddr(${rgaddr.nr})|">Выбрать</button></td>
+							<tr />
+						</tbody>
+					</table>
+				</div>
+				<div class="col-sm-8">
+					<table class="table table-sm caption-top" th:if="${dudls.size > 0}">
+						<caption class="small">Выбор ДУдЛ из ФЕРЗЛ</caption>
+						<thead class="table-light">
+							<tr class="small">
+								<th class="w-50">Тип ДУдЛ</th>
+								<th>Серия</th>
+								<th>Номер</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="small" th:each="dudl, iStat : ${dudls}">
+								<td
+									th:text="${dudl.dudlType != null ? dudl.dudlType.docName : dudl.dudlTypeStr}"></td>
+								<td th:text="${dudl.dudlSer}"></td>
+								<td th:text="${dudl.dudlNum}"></td>
+								<td><button th:id="'dudl'+${dudl.nr}"
+									class="btn btn-sm btn-primary"
+										style="--bs-btn-padding-y: .0rem; --bs-btn-padding-x: .25rem; --bs-btn-font-size: .65rem;"
+										type="button" th:onclick="|setDudlByNr(${dudl.nr})|">Выбрать</button></td>
+							<tr />
+						</tbody>
+					</table>
+					<div class="row">
+						<div class="col-sm-8">
+							<div class="form-group">
+								<label class="col-form-label col-form-label-sm" for="dudlType">Тип
+									ДУдЛ</label> <select id="dudlType" th:field="*{formParams.dudlType}"
+									class="form-select form-select-sm"
+									th:classappend="${#fields.hasErrors('formParams.dudlType')} ? 'is-invalid' : ''"
+									title="Обязательно к заполнению">
+									<option value=""></option>
+									<option th:each="dudlType : ${dudlTypes}"
+										th:value="${dudlType.docCode}" th:text="${dudlType.docName}"
+										th:selected="${formParams.dudlType}"></option>
+								</select>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="form-group">
+								<label class="col-form-label col-form-label-sm" for="dudlSer">Серия
+									ДУдЛ</label> <input type="text" th:field="*{formParams.dudlSer}"
+									id="dudlSer" class="form-control form-control-sm"
+									th:classappend="${#fields.hasErrors('formParams.dudlSer')} ? 'is-invalid' : ''"
+									placeholder="серия"/>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="form-group">
+								<label class="col-form-label col-form-label-sm" for="dudlNum">Номер
+									ДУдЛ</label> <input type="text" th:field="*{formParams.dudlNum}"
+									id="dudlNum" class="form-control form-control-sm"
+									th:classappend="${#fields.hasErrors('formParams.dudlNum')} ? 'is-invalid' : ''"
+									placeholder="номер" title="Обязательно к заполнению" />
+							</div>
+						</div>
+					</div>
+					<div class="row" th:if="${personAge < 18}">
+						<div class="form-group">
+								<label class="col-form-label col-form-label-sm" for="dudlPredst">Документ, подтверждающий право законного предстовителя</label> <textarea  th:field="*{formParams.dudlPredst}"
+									id="dudlPredst" class="form-control form-control-sm"
+									th:classappend="${#fields.hasErrors('formParams.dudlPredst')} ? 'is-invalid' : ''" title="Обязательно к заполнению"></textarea>
+							</div>
+					</div>
+				</div>
+			</div>
+			<br />
+			<div class="row">
+				<div class="col-sm">
+					<table class="table table-sm">
+						<thead class="table-light">
+							<tr class="small">
+								<th class="w-75">Адрес регистрации (выбор из ГАР)</th>
+								<th colspan="2" class="w-25">Фильтр</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev1Rg}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev1Rg}"
+											th:value="${address.id}"
+											th:text="${address.name} +' ' + ${address.typename}"
+											th:selected="${gar.idlev1Rg}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev1Rg}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev2Rg}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev2Rg}"
+											th:value="${address.id}"
+											th:text="${address.name}+' ' + ${address.typename}"
+											th:selected="${gar.idlev2Rg}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev2Rg}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev3Rg}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev3Rg}"
+											th:value="${address.id}"
+											th:text="${address.name}+' ' + ${address.typename}"
+											th:selected="${gar.idlev3Rg}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev3Rg}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr th:if="${gar.lev4Rg != null}" class="small">
+								<td><select th:field="*{gar.idlev4Rg}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev4Rg}"
+											th:value="${address.id}"
+											th:text="${address.name}+' ' + ${address.typename}"
+											th:selected="${gar.idlev4Rg}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev4Rg}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev5Rg}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev5Rg}"
+											th:value="${address.id}"
+											th:text="${address.houseNum}+' ' + (${address.addNum1}?${address.addNum1}:'')+' ' + (${address.addNum2}?${address.addNum2}:'')"
+											th:selected="${gar.idlev5Rg}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev5Rg}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="col-sm">
+					<table class="table table-sm">
+						<thead class="table-light">
+							<tr class="small">
+								<th class="w-75">Адрес проживания (выбор из ГАР)</th>
+								<th colspan="2" class="w-25">Фильтр</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev1Pr}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()" th:classappend="${#fields.hasErrors('gar.idlev1Pr')} ? 'is-invalid' : ''" title="Обязательно к заполнению">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev1Pr}"
+											th:value="${address.id}"
+											th:text="${address.name} +' ' + ${address.typename}"
+											th:selected="${gar.idlev1Pr}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev1Pr}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev2Pr}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()" th:classappend="${#fields.hasErrors('gar.idlev2Pr')} ? 'is-invalid' : ''" title="Обязательно к заполнению">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev2Pr}"
+											th:value="${address.id}"
+											th:text="${address.name}+' ' + ${address.typename}"
+											th:selected="${gar.idlev2Pr}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev2Pr}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev3Pr}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()" th:classappend="${#fields.hasErrors('gar.idlev3Pr')} ? 'is-invalid' : ''" title="Обязательно к заполнению">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev3Pr}"
+											th:value="${address.id}"
+											th:text="${address.name}+' ' + ${address.typename}"
+											th:selected="${gar.idlev3Pr}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev3Pr}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr th:if="${gar.lev4Pr != null}" class="small">
+								<td><select th:field="*{gar.idlev4Pr}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()" th:classappend="${#fields.hasErrors('gar.idlev4Pr')} ? 'is-invalid' : ''" title="Обязательно к заполнению">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev4Pr}"
+											th:value="${address.id}"
+											th:text="${address.name}+' ' + ${address.typename}"
+											th:selected="${gar.idlev4Pr}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev4Pr}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev5Pr}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()" th:classappend="${#fields.hasErrors('gar.idlev5Pr')} ? 'is-invalid' : ''" title="Обязательно к заполнению">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev5Pr}"
+											th:value="${address.id}"
+											th:text="${address.houseNum}+' ' + (${address.addNum1}?${address.addNum1}:'')+' ' + (${address.addNum2}?${address.addNum2}:'')"
+											th:selected="${gar.idlev5Pr}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev5Pr}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="lpuSar">Прикрепить
+							к медицинской организации / подразделению</label> 
+							<select id="lpuSar" th:field="*{formParams.lpuId}"
+							class="form-select form-select-sm"
+							th:classappend="${#fields.hasErrors('formParams.lpuId')} ? 'is-invalid' : ''"
+							title="Обязательно к заполнению" onchange="this.form.submit()">
+							<option value=""></option>
+							<option th:each="lpu : ${lpus}"
+								th:value="${lpu.id}" th:text="${lpu.name}"
+								th:selected="${formParams.lpuId}"></option>
+						</select>
+					</div>
+				</div>
+				<div class="col-sm-1">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="lpuUnit">№ участка</label> 
+							<input id="lpuUnit" th:field="*{formParams.lpuUnit}"
+							class="form-control form-control-sm"
+							th:classappend="${#fields.hasErrors('formParams.lpuUnit')} ? 'is-invalid' : ''"
+							title="Обязательно к заполнению"/>
+					</div>
+				</div>
+				<div class="col-sm-3">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="doctorSnils">Врач</label> 
+							<select id="doctorSnils" th:field="*{formParams.doctorSnils}"
+							class="form-select form-select-sm"
+							th:classappend="${#fields.hasErrors('formParams.doctorSnils')} ? 'is-invalid' : ''"
+							title="Обязательно к заполнению" >
+							  <option value=""></option>
+							  <option th:each="doctor : ${doctors}" th:value="${doctor.snils}" th:text="${doctor.lastName} +' '+${doctor.firstName} + ' '+${doctor.patronymic}"></option>
+						</select>
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="attachExpDate">Дата открепления</label> 
+							<input type="date" th:field="*{formParams.attachExpDate}"
+							id="attachExpDate" class="form-control form-control-sm"
+							th:classappend="${#fields.hasErrors('formParams.attachExpDate')} ? 'is-invalid' : ''"
+							title="Обязательно к заполнению" />
+					</div>
+				</div>
+			</div>
+			<hr/>
+			<div class="row">
+				<div class="col-sm">
+						<input type="submit" value="Прикрепить" class="btn btn-sm btn-primary"
+							name="save" />&nbsp;
+						<input type="submit" value="Печать" class="btn btn-sm btn-primary"
+							name="print" />
+					</div>
+			</div>
+		</form>
+	</div>
+	<br/>
+	<footer class="text-center text-lg-start" th:fragment="footer"
+		th:insert="copyright"> </footer>
+	<script type="text/javascript">
+		function setDudlByNr(nr) {
+			form = document.getElementById('attachForm');
+			form.nrdudl.value = nr;
+			form.submit();
+		}
+		function initGarByRgaddr(nr) {
+			form = document.getElementById('attachForm');
+			form.rgaddr.value = nr;
+			form.submit();
+		}
+		function initContactByNr(nr) {
+			form = document.getElementById('attachForm');
+			form.cntnr.value = nr;
+			form.submit();
+		}
+	</script>
+	<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
