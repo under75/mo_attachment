@@ -48,11 +48,11 @@ public class AttachFormParameters {
 	}
 
 	public void setPhone(String phone) {
-		this.phone = phone;
+		this.phone = phone.trim();
 	}
 
 	public void setEmail(String email) {
-		this.email = email;
+		this.email = email.trim();
 	}
 
 	public String getLpuUnit() {
@@ -60,7 +60,7 @@ public class AttachFormParameters {
 	}
 
 	public void setLpuUnit(String lpuUnit) {
-		this.lpuUnit = lpuUnit;
+		this.lpuUnit = lpuUnit.trim();
 	}
 
 	public String getDoctorSnils() {
@@ -68,7 +68,7 @@ public class AttachFormParameters {
 	}
 
 	public void setDoctorSnils(String doctorSnils) {
-		this.doctorSnils = doctorSnils;
+		this.doctorSnils = doctorSnils.trim();
 	}
 
 	public Integer getDudlType() {
@@ -88,11 +88,11 @@ public class AttachFormParameters {
 	}
 
 	public void setDudlSer(String dudlSer) {
-		this.dudlSer = dudlSer;
+		this.dudlSer = dudlSer.trim();
 	}
 
 	public void setDudlNum(String dudlNum) {
-		this.dudlNum = dudlNum;
+		this.dudlNum = dudlNum.trim();
 	}
 
 	public String getAttachExpDate() {
@@ -108,7 +108,7 @@ public class AttachFormParameters {
 	}
 
 	public void setDudlPredst(String dudlPredst) {
-		this.dudlPredst = dudlPredst;
+		this.dudlPredst = dudlPredst.trim();
 	}
 	
 }

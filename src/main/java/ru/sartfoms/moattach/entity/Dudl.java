@@ -40,7 +40,7 @@ public class Dudl {
 
 	@OneToOne
 	@NotFound(action = NotFoundAction.IGNORE)
-	@JoinColumn(name = "dudltype", referencedColumnName = "cd_dok",insertable=false, updatable=false)
+	@JoinColumn(name = "dudltype", referencedColumnName = "code",insertable=false, updatable=false)
 	private DudlType dudlType;
 	
 	@Column(name = "dudltype")

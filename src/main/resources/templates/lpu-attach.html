@@ -212,7 +212,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="row" th:if="${personAge < 18}">
+					<div class="row" th:if="${personAge < T(ru.sartfoms.moattach.service.PersonService).MAX_CHILD_AGE}">
 						<div class="form-group">
 								<label class="col-form-label col-form-label-sm" for="dudlPredst">Документ, подтверждающий право законного предстовителя</label> <textarea  th:field="*{formParams.dudlPredst}"
 									id="dudlPredst" class="form-control form-control-sm"

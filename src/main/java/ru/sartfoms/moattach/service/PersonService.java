@@ -11,6 +11,7 @@ import ru.sartfoms.moattach.repository.PersonRepository;
 
 @Service
 public class PersonService {
+	public static final int MAX_CHILD_AGE = 18;
 	private final PersonRepository personRepository;
 
 	public PersonService(PersonRepository personRepository) {

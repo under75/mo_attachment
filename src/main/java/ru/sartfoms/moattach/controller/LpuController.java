@@ -32,6 +32,7 @@ import ru.sartfoms.moattach.model.FerzlSearchParameters;
 import ru.sartfoms.moattach.model.Gar;
 import ru.sartfoms.moattach.model.PolicyTypes;
 import ru.sartfoms.moattach.service.AddressService;
+import ru.sartfoms.moattach.service.AttachOtherRegionsService;
 import ru.sartfoms.moattach.service.AttachService;
 import ru.sartfoms.moattach.service.ContactService;
 import ru.sartfoms.moattach.service.DudlService;
@@ -58,13 +59,14 @@ public class LpuController {
 	private final AttachService attachService;
 	private final ContactService contactService;
 	private final MedMzService medMzService;
+	private final AttachOtherRegionsService attachOtherRegionsService;
 	@Autowired
 	SmartValidator validator;
 
 	public LpuController(UserService userService, LpuService lpuService, DudlTypeService dudlTypeService,
 			PersonDataService personDataService, MPIErrorService mpiErrorService, PersonService personService,
 			PolicyService policyService, DudlService dudlService, AddressService addressService,
-			AttachService attachService, ContactService contactService, MedMzService medMzService) {
+			AttachService attachService, ContactService contactService, MedMzService medMzService, AttachOtherRegionsService attachOtherRegionsService) {
 		this.userService = userService;
 		this.lpuService = lpuService;
 		this.dudlTypeService = dudlTypeService;
@@ -77,6 +79,7 @@ public class LpuController {
 		this.attachService = attachService;
 		this.contactService = contactService;
 		this.medMzService = medMzService;
+		this.attachOtherRegionsService = attachOtherRegionsService;
 	}
 
 	@GetMapping("/lpu/ferzl")
@@ -144,8 +147,8 @@ public class LpuController {
 		}
 		Person person = personService.findAllByRid(rid).stream().findAny().get();
 		model.addAttribute("person", person);
-		model.addAttribute("policy",
-				policyService.findByRid(rid).stream().max(Comparator.comparing(Policy::getPcyDateB)).get());
+		Policy policy = policyService.findByRid(rid).stream().max(Comparator.comparing(Policy::getPcyDateB)).get();
+		model.addAttribute("policy", policy);
 		model.addAttribute("policyTypes", PolicyTypes.getInstance());
 		model.addAttribute("attach", attachService.findByRid(rid).stream().findAny().orElse(null));
 		Collection<Contact> contacts = contactService.findByRid(rid);
@@ -196,6 +199,12 @@ public class LpuController {
 		if (save.isPresent()) {
 			validator.validate(formParams, bindingResult);
 			validator.validate(gar, bindingResult2);
+			if ((int)model.getAttribute("personAge") < PersonService.MAX_CHILD_AGE) {
+				if (formParams.getDudlPredst().isEmpty())
+					bindingResult.rejectValue("dudlPredst", null);
+			}
+			if (!bindingResult.hasErrors() && !bindingResult2.hasErrors())
+				attachOtherRegionsService.attach(user, formParams, gar, person, policy);
 		}
 		
 		return "lpu-attach";
