@@ -1,10 +1,14 @@
 package ru.sartfoms.moattach.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
@@ -12,6 +16,8 @@ import javax.persistence.Table;
 public class AttachOtherRegions {
 	@Id
 	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_sequence")
+	@SequenceGenerator(name = "id_sequence", sequenceName = "LPUOWNER.ATTACH_OTHERREGIONS_SEQ", allocationSize = 1)
 	private Long id;
 	@Column(name = "usr")
 	private String usr;
@@ -61,6 +67,10 @@ public class AttachOtherRegions {
 	private String lpuUnit;
 	@Column(name = "doctorsnils")
 	private String doctorsnils;
+	@Column(name = "period")
+	private Integer period;
+	@Column(name = "dtins")
+	private LocalDateTime dtIns;
 	
 	public Long getId() {
 		return id;
@@ -177,6 +187,9 @@ public class AttachOtherRegions {
 		this.dudlType = dudlType;
 	}
 	public void setDudlSer(String dudlSer) {
+		if (dudlSer.matches("^\\d{4}$")) {
+			dudlSer = dudlSer.substring(0, 2) + " " + dudlSer.substring(2);
+		}
 		this.dudlSer = dudlSer;
 	}
 	public void setDudlNum(String dudlNum) {
@@ -212,5 +225,16 @@ public class AttachOtherRegions {
 	public void setDoctorsnils(String doctorsnils) {
 		this.doctorsnils = doctorsnils;
 	}
-
+	public Integer getPeriod() {
+		return period;
+	}
+	public void setPeriod(Integer period) {
+		this.period = period;
+	}
+	public LocalDateTime getDtIns() {
+		return dtIns;
+	}
+	public void setDtIns(LocalDateTime dtIns) {
+		this.dtIns = dtIns;
+	}
 }

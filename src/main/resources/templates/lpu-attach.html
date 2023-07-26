@@ -19,8 +19,10 @@
 					персоны в ФЕРЗЛ</a></li>
 			<li class="nav-item"><a class="nav-link active"
 				aria-current="page" href="#">Ввод информации о прикреплении</a></li>
-			<li class="nav-item"><a class="nav-link" href="#">Прикрепленные
+			<li class="nav-item"><a class="nav-link" href="#">Поиск прикрепленной
 					персоны</a></li>
+			<li class="nav-item"><a class="nav-link disabled" href="#">Редактирование
+					информации о прикреплении</a></li>
 		</ul>
 		<form th:method="POST" th:action="@{/lpu/attach}" id="attachForm">
 			<input type="hidden" name="rid" th:value="${rid}" /> <input
@@ -399,7 +401,7 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-sm-6">
+				<div class="col-sm-5">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="lpuSar">Прикрепить
 							к медицинской организации / подразделению</label> 
@@ -425,7 +427,7 @@
 				</div>
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label class="col-form-label col-form-label-sm" for="doctorSnils">Врач</label> 
+						<label class="col-form-label col-form-label-sm" for="doctorSnils">ФИО врача</label> 
 							<select id="doctorSnils" th:field="*{formParams.doctorSnils}"
 							class="form-select form-select-sm"
 							th:classappend="${#fields.hasErrors('formParams.doctorSnils')} ? 'is-invalid' : ''"
@@ -437,10 +439,19 @@
 				</div>
 				<div class="col-sm">
 					<div class="form-group">
-						<label class="col-form-label col-form-label-sm" for="attachExpDate">Дата открепления</label> 
-							<input type="date" th:field="*{formParams.attachExpDate}"
-							id="attachExpDate" class="form-control form-control-sm"
-							th:classappend="${#fields.hasErrors('formParams.attachExpDate')} ? 'is-invalid' : ''"
+						<label class="col-form-label col-form-label-sm" for="attachExpDate">Дата прикрепления</label> 
+							<input type="date" th:field="*{formParams.effDate}"
+							id="effDate" class="form-control form-control-sm"
+							th:classappend="${#fields.hasErrors('formParams.effDate')} ? 'is-invalid' : ''"
+							title="Обязательно к заполнению" />
+					</div>
+				</div>
+				<div class="col-sm-1">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="attachExpDate">Срок, дней</label> 
+							<input type="number" min="1" max="366" th:field="*{formParams.period}"
+							id="period" class="form-control form-control-sm"
+							th:classappend="${#fields.hasErrors('formParams.period')} ? 'is-invalid' : ''"
 							title="Обязательно к заполнению" />
 					</div>
 				</div>
@@ -451,15 +462,97 @@
 						<input type="submit" value="Прикрепить" class="btn btn-sm btn-primary"
 							name="save" />&nbsp;
 						<input type="submit" value="Печать" class="btn btn-sm btn-primary"
-							name="print" />
+							name="print" disabled/>
 					</div>
 			</div>
+			<div id="attachModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" th:if="${personAttached}">
+	        	<div class="modal-dialog modal-xl">
+	            	<div class="modal-content">
+			            <div class="modal-header">
+			                <h5 class="modal-title">Персона прикреплена</h5>
+			            </div>
+			            <div class="modal-body">
+			                <table class="table table-sm">
+						    	<thead class="table-light">
+									<tr class="small">
+										<th>ФИО</th>
+										<th>Дата рожд.</th>
+										<th>Номер полиса</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td th:text="${attachOtherRegions.lastName + ' ' + attachOtherRegions.firstName + ' ' + attachOtherRegions.patronymic}"></td>
+										<td th:text="${#temporals.format(attachOtherRegions.birthDay,'dd.MM.yyyy')}"></td>
+										<td th:text="${attachOtherRegions.pcyNum}"></td>
+									</tr>
+								</tbody>
+						    </table>
+						    <table class="table table-sm caption-top">
+						    	<caption class="small">прикреплен<span th:if="${policy.gender == 2}">а</span></caption>
+						    	<thead class="table-light">
+									<tr class="small">
+										<th>Мед.организация/подразделение</th>
+										<th>№ участка.</th>
+										<th>СНИЛС врача</th>
+										<th>Период прикрепления</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<th:block th:each="lpu : ${lpus}">
+											<td th:if="${lpu.id.intValue() == attachOtherRegions.lpuId.intValue()}" th:text="${lpu.name}"></td>
+										</th:block>
+										<td th:text="${attachOtherRegions.lpuUnit}"></td>
+										<td th:text="${attachOtherRegions.doctorsnils}"></td>
+										<td><span th:text="${#temporals.format(attachOtherRegions.effDate, 'dd.MM.yyyy')}"></span> - <span th:text="${attachOtherRegions.expDate != null ? #temporals.format(attachOtherRegions.expDate, 'dd.MM.yyyy') :  #temporals.format(attachOtherRegions.effDate.plusDays(attachOtherRegions.period), 'dd.MM.yyyy')}"></span></td>
+									</tr>
+								</tbody>
+						    </table>
+			            </div>
+			            <div class="modal-footer">
+			                <button type="button" class="btn btn-sm btn-secondary" onclick="location.href='/lpu/ferzl'">Вернуться к поиску</button>
+			                <button type="submit" class="btn btn-sm btn-primary" name="edit">Редактировать</button>
+			            </div>
+		            </div>
+	       		</div>
+	  	    </div>
+	  	    <div id="okatoModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" th:if="${policy.okato != null && policy.okato.code eq '63000'}">
+	  	    	<div class="modal-dialog modal-xl">
+	            	<div class="modal-content">
+			            <div class="modal-header">
+			                <h5 class="modal-title">Персона застрахована в Саратовской области</h5>
+			            </div>
+			            <div class="modal-body">
+			            	 <table class="table table-sm">
+						    	<thead class="table-light">
+									<tr class="small">
+										<th>ФИО</th>
+										<th>Дата рожд.</th>
+										<th>Номер полиса</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td th:text="${person.lastName + ' ' + person.firstName + ' ' + person.patronymic}"></td>
+										<td th:text="${#temporals.format(person.birthDay,'dd.MM.yyyy')}"></td>
+										<td th:text="${policy.enp != null ? policy.enp : policy.pcyNum}"></td>
+									</tr>
+								</tbody>
+						    </table>
+			            </div>
+			            <div class="modal-footer">
+			                <button type="button" class="btn btn-sm btn-secondary" onclick="location.href='/lpu/ferzl'">Вернуться к поиску</button>
+			            </div>
+			        </div>
+			    </div>
+	  	    </div>
 		</form>
 	</div>
 	<br/>
 	<footer class="text-center text-lg-start" th:fragment="footer"
 		th:insert="copyright"> </footer>
-	<script type="text/javascript">
+	<script th:inline="javascript">
 		function setDudlByNr(nr) {
 			form = document.getElementById('attachForm');
 			form.nrdudl.value = nr;
@@ -474,6 +567,21 @@
 			form = document.getElementById('attachForm');
 			form.cntnr.value = nr;
 			form.submit();
+		}
+		
+		var flag1 = /*[[${personAttached}]]*/ false;
+		var flag2 = /*[[${policy.okato != null && policy.okato.code eq '63000'}]]*/ false;
+		
+		if (flag1) {
+			window.onload = () => {
+				const attachModal = new bootstrap.Modal('#attachModal');
+				attachModal.show();
+			}
+		} else if (flag2) {
+			window.onload = () => {
+				const okatoModal = new bootstrap.Modal('#okatoModal');
+				okatoModal.show();
+			}
 		}
 	</script>
 	<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>

@@ -1,29 +1,32 @@
 package ru.sartfoms.moattach.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "spr_dok", schema = "OMCOWNER")
-public class DudlType {
-	
+@Table(name = "v_spr_dok", schema = "APPLGAR")
+public class DudlType implements Serializable{
+	private static final long serialVersionUID = 1L;
+
 	@Id
-	@Column(name = "cd_dok")
-	private Integer docCode;
+	@Column(name = "code")
+	private String docCode;
 	
-	@Column(name = "nm_dok")
+	@Column(name = "title")
 	private String docName;
 	
 	public DudlType() {
 	}
 
-	public Integer getDocCode() {
+	public String getDocCode() {
 		return docCode;
 	}
 
-	public void setDocCode(Integer docCode) {
+	public void setDocCode(String docCode) {
 		this.docCode = docCode;
 	}
 

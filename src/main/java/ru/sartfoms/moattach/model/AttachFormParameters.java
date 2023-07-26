@@ -1,5 +1,7 @@
 package ru.sartfoms.moattach.model;
 
+import java.time.LocalDate;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -19,17 +21,20 @@ public class AttachFormParameters {
 	@Size(max=14)
 	@NotEmpty
 	private String doctorSnils;
-	@NotNull
-	private Integer dudlType;
+	@NotEmpty
+	private String dudlType;
 	@Size(max = 12)
 	private String dudlSer;
 	@Size(max = 30)
 	@NotEmpty
 	private String dudlNum;
 	@NotEmpty
-	private String attachExpDate;
+	private String effDate = LocalDate.now().toString();
+	private String expDate;
 	@Size(max = 200)
 	private String dudlPredst;
+	@NotNull
+	private Integer period = 90;
 
 	public Integer getLpuId() {
 		return lpuId;
@@ -71,7 +76,7 @@ public class AttachFormParameters {
 		this.doctorSnils = doctorSnils.trim();
 	}
 
-	public Integer getDudlType() {
+	public String getDudlType() {
 		return dudlType;
 	}
 
@@ -83,24 +88,32 @@ public class AttachFormParameters {
 		return dudlNum;
 	}
 
-	public void setDudlType(Integer dudlType) {
-		this.dudlType = dudlType;
+	public void setDudlType(String dudlType) {
+		this.dudlType = dudlType.trim();
 	}
 
 	public void setDudlSer(String dudlSer) {
-		this.dudlSer = dudlSer.trim();
+		this.dudlSer = dudlSer;
 	}
 
 	public void setDudlNum(String dudlNum) {
 		this.dudlNum = dudlNum.trim();
 	}
 
-	public String getAttachExpDate() {
-		return attachExpDate;
+	public String getEffDate() {
+		return effDate;
 	}
 
-	public void setAttachExpDate(String attachExpDate) {
-		this.attachExpDate = attachExpDate;
+	public String getExpDate() {
+		return expDate;
+	}
+
+	public void setEffDate(String effDate) {
+		this.effDate = effDate;
+	}
+
+	public void setExpDate(String expDate) {
+		this.expDate = expDate;
 	}
 
 	public String getDudlPredst() {
@@ -110,5 +123,13 @@ public class AttachFormParameters {
 	public void setDudlPredst(String dudlPredst) {
 		this.dudlPredst = dudlPredst.trim();
 	}
-	
+
+	public Integer getPeriod() {
+		return period;
+	}
+
+	public void setPeriod(Integer period) {
+		this.period = period;
+	}
+
 }

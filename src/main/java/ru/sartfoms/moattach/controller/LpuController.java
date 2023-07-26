@@ -1,9 +1,12 @@
 package ru.sartfoms.moattach.controller;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,9 +18,11 @@ import org.springframework.validation.SmartValidator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import ru.sartfoms.moattach.entity.Address;
+import ru.sartfoms.moattach.entity.AttachOtherRegions;
 import ru.sartfoms.moattach.entity.Contact;
 import ru.sartfoms.moattach.entity.Dudl;
 import ru.sartfoms.moattach.entity.Lpu;
@@ -44,6 +49,7 @@ import ru.sartfoms.moattach.service.PersonDataService;
 import ru.sartfoms.moattach.service.PersonService;
 import ru.sartfoms.moattach.service.PolicyService;
 import ru.sartfoms.moattach.service.UserService;
+import ru.sartfoms.moattach.util.DateValidator;
 
 @Controller
 public class LpuController {
@@ -66,7 +72,8 @@ public class LpuController {
 	public LpuController(UserService userService, LpuService lpuService, DudlTypeService dudlTypeService,
 			PersonDataService personDataService, MPIErrorService mpiErrorService, PersonService personService,
 			PolicyService policyService, DudlService dudlService, AddressService addressService,
-			AttachService attachService, ContactService contactService, MedMzService medMzService, AttachOtherRegionsService attachOtherRegionsService) {
+			AttachService attachService, ContactService contactService, MedMzService medMzService,
+			AttachOtherRegionsService attachOtherRegionsService) {
 		this.userService = userService;
 		this.lpuService = lpuService;
 		this.dudlTypeService = dudlTypeService;
@@ -124,10 +131,21 @@ public class LpuController {
 	}
 
 	@PostMapping("/lpu/attach")
-	public String attachPersonToLpu(Model model, @ModelAttribute("gar") Gar gar, BindingResult bindingResult2, @RequestParam("rid") Long rid,
-			@ModelAttribute("formParams") AttachFormParameters formParams, BindingResult bindingResult,
-			@RequestParam("rgaddr") Optional<Integer> rgaddr, @RequestParam("cntnr") Optional<Integer> cntnr,
-			@RequestParam("nrdudl") Optional<Integer> nrdudl, @RequestParam("save") Optional<String> save) {
+	public String attachPersonToLpu(Model model, @ModelAttribute("gar") Gar gar, BindingResult bindingResult2,
+			@RequestParam("rid") Long rid, @ModelAttribute("formParams") AttachFormParameters formParams,
+			BindingResult bindingResult, @RequestParam("rgaddr") Optional<Integer> rgaddr,
+			@RequestParam("cntnr") Optional<Integer> cntnr, @RequestParam("nrdudl") Optional<Integer> nrdudl,
+			@RequestParam("save") Optional<String> save, @RequestParam("edit") Optional<String> edit,
+			HttpServletRequest request) {
+
+		Policy policy = policyService.findByRid(rid).stream().max(Comparator.comparing(Policy::getPcyDateB)).get();
+		AttachOtherRegions attachOtherRegions = attachOtherRegionsService
+				.findByPcyNum(policy.getEnp() != null ? policy.getEnp() : policy.getPcyNum());
+		if (edit.isPresent()) {
+			request.setAttribute("attachId", attachOtherRegions.getId());
+			return "forward:/lpu/attach/edit";
+		}
+
 		model.addAttribute("rid", rid);
 		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
 		Lpu lpu = lpuService.getById(user.getLpuId());
@@ -147,7 +165,7 @@ public class LpuController {
 		}
 		Person person = personService.findAllByRid(rid).stream().findAny().get();
 		model.addAttribute("person", person);
-		Policy policy = policyService.findByRid(rid).stream().max(Comparator.comparing(Policy::getPcyDateB)).get();
+		model.addAttribute("attachOtherRegions", attachOtherRegions);
 		model.addAttribute("policy", policy);
 		model.addAttribute("policyTypes", PolicyTypes.getInstance());
 		model.addAttribute("attach", attachService.findByRid(rid).stream().findAny().orElse(null));
@@ -170,8 +188,8 @@ public class LpuController {
 		model.addAttribute("dudls", dudls);
 		model.addAttribute("dudlTypes", dudlTypeService.findAll());
 		if (nrdudl.isPresent()) {
-			Dudl dudl = dudls.stream().filter(t->t.getNr().intValue() == nrdudl.get().intValue()).findFirst().get();
-			formParams.setDudlType(dudl.getDudlType().getDocCode());
+			Dudl dudl = dudls.stream().filter(t -> t.getNr().intValue() == nrdudl.get().intValue()).findFirst().get();
+			formParams.setDudlType(dudl.getDudlTypeStr());
 			formParams.setDudlSer(dudl.getDudlSer());
 			formParams.setDudlNum(dudl.getDudlNum());
 		}
@@ -193,20 +211,43 @@ public class LpuController {
 			doctors = medMzService.findByLpuId(parentId != 0 ? parentId : formParams.getLpuId());
 		}
 		model.addAttribute("doctors", doctors);
-		
+
 		model.addAttribute("personAge", personService.getAge(person));
-		
+
 		if (save.isPresent()) {
 			validator.validate(formParams, bindingResult);
 			validator.validate(gar, bindingResult2);
-			if ((int)model.getAttribute("personAge") < PersonService.MAX_CHILD_AGE) {
+			if (!DateValidator.isValid(formParams.getEffDate()))
+				bindingResult.rejectValue("effDate", null);
+			if ((int) model.getAttribute("personAge") < PersonService.MAX_CHILD_AGE) {
 				if (formParams.getDudlPredst().isEmpty())
 					bindingResult.rejectValue("dudlPredst", null);
 			}
-			if (!bindingResult.hasErrors() && !bindingResult2.hasErrors())
-				attachOtherRegionsService.attach(user, formParams, gar, person, policy);
+			if (!bindingResult.hasErrors() && !bindingResult2.hasErrors()) {
+				if (attachOtherRegions != null) {
+					attachOtherRegions.setExpDate(LocalDate.now());
+					attachOtherRegionsService.save(attachOtherRegions);
+				}
+				attachOtherRegions = attachOtherRegionsService.attach(user, formParams, gar, person, policy);
+				model.addAttribute("attachOtherRegions", attachOtherRegions);
+			}
 		}
-		
+
+		Boolean personAttached = attachOtherRegions != null
+				&& attachOtherRegionsService.isAttachEffective(attachOtherRegions);
+		model.addAttribute("personAttached", personAttached);
+
 		return "lpu-attach";
+	}
+
+	@PostMapping("/lpu/attach/edit")
+	public String editAttachment(Model model, @RequestAttribute("attachId") Optional<Long> attachId) {
+		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
+		Lpu lpu = lpuService.getById(user.getLpuId());
+		model.addAttribute("lpu", lpu);
+		AttachOtherRegions attachOtherRegions = attachOtherRegionsService.getReferenceById(attachId);
+		model.addAttribute("attachOtherRegions", attachOtherRegions);
+
+		return "lpu-attach-edit";
 	}
 }

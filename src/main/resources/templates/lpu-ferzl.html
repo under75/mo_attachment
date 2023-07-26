@@ -19,8 +19,10 @@
 				aria-current="page" href="#">Поиск персоны в ФЕРЗЛ</a></li>
 			<li class="nav-item"><a class="nav-link disabled" href="#">Ввод
 					информации о прикреплении</a></li>
-			<li class="nav-item"><a class="nav-link" href="#">Прикрепленные
+			<li class="nav-item"><a class="nav-link" href="#">Поиск прикрепленной
 					персоны</a></li>
+			<li class="nav-item"><a class="nav-link disabled" href="#">Редактирование
+					информации о прикреплении</a></li>
 		</ul>
 		<form th:method="POST" th:action="@{/lpu/ferzl}" id="searchForm">
 			<div class="row">
@@ -228,7 +230,7 @@
 	<footer class="text-center text-lg-start" th:fragment="footer"
 		th:insert="copyright"> </footer>
 	<script type="text/javascript">
-		document.getElementById("persForm").onkeypress = function(e) {
+		document.getElementById("searchForm").onkeypress = function(e) {
 			var key = e.charCode || e.keyCode || 0;
 			if (key == 13) {
 				e.preventDefault();

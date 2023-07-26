@@ -23,13 +23,9 @@ public class Gar {
 	private Long idlev3Rg;
 	private Long idlev4Rg;
 	private Long idlev5Rg;
-	@NotNull
 	private Long idlev1Pr;
-	@NotNull
 	private Long idlev2Pr;
-	@NotNull
 	private Long idlev3Pr;
-	@NotNull
 	private Long idlev4Pr;
 	@NotNull
 	private Long idlev5Pr;
