@@ -50,7 +50,7 @@ public class AddressService {
 				new String[] { ActualStatus.ДНП.toString(), ActualStatus.ДПП.toString() });
 	}
 
-	public void initGar(Gar gar, Collection<Address> rgAddresses, Integer nrRgaddr) {
+	public void initGarRgFromFerzl(Gar gar, Collection<Address> rgAddresses, Integer nrRgaddr) {
 		if (nrRgaddr != null) {
 			String path = "";
 			Address addrRg = rgAddresses.stream().filter(t -> t.getNr() == nrRgaddr).findAny().get();
@@ -67,32 +67,61 @@ public class AddressService {
 					path = admHierarchyRepository
 							.findByObjectidAndEndDateAfter(addrObj.getObjectid(), LocalDate.now().toString()).getPath();
 			}
-			for (String objidStr : path.split("\\.")) {
-				Long objid = Long.valueOf(objidStr);
-				AsAddrObj asAddrObj = addrObjRepository.findByObjectidAndIsActual(objid, true);
-				if (asAddrObj == null) {
-
-				} else if (asAddrObj.getLevel() == 1) {
-					gar.setIdlev1Rg(asAddrObj.getId());
-					gar.setLev2Rg(findLevelByParent(asAddrObj.getObjectid()));
-				} else if (asAddrObj.getLevel() > 1 && asAddrObj.getLevel() < 6) {
-					gar.setIdlev2Rg(asAddrObj.getId());
-					gar.setLev3Rg(findLevelByParent(asAddrObj.getObjectid()));
-				} else if (asAddrObj.getLevel() < 8 && asAddrObj.getLevel() > 5) {
-					gar.setIdlev3Rg(asAddrObj.getId());
-					gar.setLev4Rg(findLevelByParent(asAddrObj.getObjectid()));
-				} else if (asAddrObj.getLevel() == 8) {
-					if (gar.getIdlev3Rg() == null) {
-						gar.setIdlev3Rg(asAddrObj.getId());
-					} else {
-						gar.setIdlev4Rg(asAddrObj.getId());
-					}
-					gar.setLev5Rg(findHousesByParent(asAddrObj.getObjectid()));
-				}
-			}
+			initGarRg(gar, path);
 		}
 		gar.setLev1Rg(findLevel1());
 		gar.setLev1Pr(findLevel1());
+	}
+	
+	private void initGarRg(Gar gar, String path) {
+		for (String objidStr : path.split("\\.")) {
+			Long objid = Long.valueOf(objidStr);
+			AsAddrObj asAddrObj = addrObjRepository.findByObjectidAndIsActual(objid, true);
+			if (asAddrObj == null) {
+
+			} else if (asAddrObj.getLevel() == 1) {
+				gar.setIdlev1Rg(asAddrObj.getId());
+				gar.setLev2Rg(findLevelByParent(asAddrObj.getObjectid()));
+			} else if (asAddrObj.getLevel() > 1 && asAddrObj.getLevel() < 6) {
+				gar.setIdlev2Rg(asAddrObj.getId());
+				gar.setLev3Rg(findLevelByParent(asAddrObj.getObjectid()));
+			} else if (asAddrObj.getLevel() < 8 && asAddrObj.getLevel() > 5) {
+				gar.setIdlev3Rg(asAddrObj.getId());
+				gar.setLev4Rg(findLevelByParent(asAddrObj.getObjectid()));
+			} else if (asAddrObj.getLevel() == 8) {
+				if (gar.getIdlev3Rg() == null) {
+					gar.setIdlev3Rg(asAddrObj.getId());
+				} else {
+					gar.setIdlev4Rg(asAddrObj.getId());
+				}
+				gar.setLev5Rg(findHousesByParent(asAddrObj.getObjectid()));
+			}
+		}
+	}
+	private void initGarPr(Gar gar, String path) {
+		for (String objidStr : path.split("\\.")) {
+			Long objid = Long.valueOf(objidStr);
+			AsAddrObj asAddrObj = addrObjRepository.findByObjectidAndIsActual(objid, true);
+			if (asAddrObj == null) {
+
+			} else if (asAddrObj.getLevel() == 1) {
+				gar.setIdlev1Pr(asAddrObj.getId());
+				gar.setLev2Pr(findLevelByParent(asAddrObj.getObjectid()));
+			} else if (asAddrObj.getLevel() > 1 && asAddrObj.getLevel() < 6) {
+				gar.setIdlev2Pr(asAddrObj.getId());
+				gar.setLev3Pr(findLevelByParent(asAddrObj.getObjectid()));
+			} else if (asAddrObj.getLevel() < 8 && asAddrObj.getLevel() > 5) {
+				gar.setIdlev3Pr(asAddrObj.getId());
+				gar.setLev4Pr(findLevelByParent(asAddrObj.getObjectid()));
+			} else if (asAddrObj.getLevel() == 8) {
+				if (gar.getIdlev3Pr() == null) {
+					gar.setIdlev3Pr(asAddrObj.getId());
+				} else {
+					gar.setIdlev4Pr(asAddrObj.getId());
+				}
+				gar.setLev5Pr(findHousesByParent(asAddrObj.getObjectid()));
+			}
+		}
 	}
 
 	public void setGarLevels(Gar gar) {
@@ -284,5 +313,118 @@ public class AddressService {
 	private Collection<AsAddrObj> findLevel1ByNameContainingIgnoreCase(String flev1Rg) {
 		return addrObjRepository.findByLevelAndNameContainingIgnoreCaseOrderByName(1, flev1Rg);
 	}
+
+	public void initGar(Gar gar, String aoguidreg, String aoguidpr, String hsguidreg, String hsguidpr) {
+		String path = null;
+		if (hsguidreg != null) {
+			House house = houseRepository.findByObjectguidAndIsActual(hsguidreg, true);
+			if (house != null) {
+				path = admHierarchyRepository
+						.findByObjectidAndEndDateAfter(house.getObjectid(), LocalDate.now().toString()).getPath();
+				gar.setIdlev5Rg(house.getId());
+			}
+		} else if (aoguidreg != null) {
+			AsAddrObj addrObj = addrObjRepository.findByObjectguidAndIsActual(aoguidreg, true);
+			if (addrObj != null)
+				path = admHierarchyRepository
+						.findByObjectidAndEndDateAfter(addrObj.getObjectid(), LocalDate.now().toString()).getPath();
+		}
+		if (path != null) {
+			initGarRg(gar, path);
+		}
+		path = null;
+		if (hsguidpr != null) {
+			House house = houseRepository.findByObjectguidAndIsActual(hsguidpr, true);
+			if (house != null) {
+				path = admHierarchyRepository
+						.findByObjectidAndEndDateAfter(house.getObjectid(), LocalDate.now().toString()).getPath();
+				gar.setIdlev5Pr(house.getId());
+			}
+		} else if (aoguidpr != null) {
+			AsAddrObj addrObj = addrObjRepository.findByObjectguidAndIsActual(aoguidpr, true);
+			if (addrObj != null)
+				path = admHierarchyRepository
+						.findByObjectidAndEndDateAfter(addrObj.getObjectid(), LocalDate.now().toString()).getPath();
+		}
+		if (path != null) {
+			initGarPr(gar, path);
+		}
+		gar.setLev1Rg(findLevel1());
+		gar.setLev1Pr(findLevel1());
+	}
+
+	public String getAddrRgStr(Gar gar) {
+		StringBuilder result = new StringBuilder();
+		if (gar.getIdlev1Rg() != null) {
+			result.append(gar.getLev1Rg().stream()
+				.filter(t -> t.getId().longValue() == gar.getIdlev1Rg().longValue() && t.getIsActual())
+				.map(t -> t.getName() + " " + t.getTypename()).findFirst().get().trim());
+		}
+		if (gar.getIdlev2Rg() != null) {
+			result.append(", "
+					+ gar.getLev2Rg().stream()
+					.filter(t -> t.getId().longValue() == gar.getIdlev2Rg().longValue() && t.getIsActual())
+					.map(t -> t.getName() + " " + t.getTypename()).findFirst().get().trim());
+		}
+		if (gar.getIdlev3Rg() != null) {
+			result.append(", "
+					+ gar.getLev3Rg().stream()
+					.filter(t -> t.getId().longValue() == gar.getIdlev3Rg().longValue() && t.getIsActual())
+					.map(t -> t.getName() + " " + t.getTypename()).findFirst().get().trim());
+		}
+		if (gar.getIdlev4Rg() != null) {
+			result.append(", " + gar.getLev4Rg().stream()
+					.filter(t -> t.getId().longValue() == gar.getIdlev4Rg() && t.getIsActual())
+					.map(t -> t.getName() + " " + t.getTypename()).findFirst().get().trim());
+		}
+		if (gar.getIdlev5Rg() != null) {
+			result.append(", "
+				+ gar.getLev5Rg().stream()
+						.filter(t -> t.getId().longValue() == gar.getIdlev5Rg().longValue() && t.getIsActual())
+						.map(t -> t.getHouseNum() + " " + (t.getAddNum1() != null ? t.getAddNum1() : "") + " "
+								+ (t.getAddNum2() != null ? t.getAddNum2() : ""))
+						.findFirst().get().trim());
+		}
+		
+		return result.toString();
+	}
+	
+	public String getAddrPrStr(Gar gar) {
+		StringBuilder result = new StringBuilder();
+		if (gar.getIdlev1Pr() != null) {
+			result.append(gar.getLev1Pr().stream()
+				.filter(t -> t.getId().longValue() == gar.getIdlev1Pr().longValue() && t.getIsActual())
+				.map(t -> t.getName() + " " + t.getTypename()).findFirst().get().trim());
+		}
+		if (gar.getIdlev2Pr() != null) {
+			result.append(", "
+					+ gar.getLev2Pr().stream()
+					.filter(t -> t.getId().longValue() == gar.getIdlev2Pr().longValue() && t.getIsActual())
+					.map(t -> t.getName() + " " + t.getTypename()).findFirst().get().trim());
+		}
+		if (gar.getIdlev3Pr() != null) {
+			result.append(", "
+					+ gar.getLev3Pr().stream()
+					.filter(t -> t.getId().longValue() == gar.getIdlev3Pr().longValue() && t.getIsActual())
+					.map(t -> t.getName() + " " + t.getTypename()).findFirst().get().trim());
+		}
+		if (gar.getIdlev4Pr() != null && gar.getLev4Pr() != null) {
+			result.append(", " + gar.getLev4Pr().stream()
+					.filter(t -> t.getId().longValue() == gar.getIdlev4Pr() && t.getIsActual())
+					.map(t -> t.getName() + " " + t.getTypename()).findFirst().get().trim());
+		}
+		if (gar.getIdlev5Pr() != null) {
+			result.append(", "
+				+ gar.getLev5Pr().stream()
+						.filter(t -> t.getId().longValue() == gar.getIdlev5Pr().longValue() && t.getIsActual())
+						.map(t -> t.getHouseNum() + " " + (t.getAddNum1() != null ? t.getAddNum1() : "") + " "
+								+ (t.getAddNum2() != null ? t.getAddNum2() : ""))
+						.findFirst().get().trim());
+		}
+		
+		return result.toString();
+	}
+	
+	
 
 }

@@ -1,6 +1,6 @@
 package ru.sartfoms.moattach.model;
 
-import java.time.LocalDate;
+import java.util.Collection;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
@@ -10,15 +10,15 @@ import javax.validation.constraints.Size;
 public class AttachFormParameters {
 	@NotNull
 	private Integer lpuId;
-	@Size(max=50)
+	@Size(max = 50)
 	private String phone;
 	@Email
-	@Size(max=50)
+	@Size(max = 50)
 	private String email;
-	@Size(max=100)
+	@Size(max = 100)
 	@NotEmpty
 	private String lpuUnit;
-	@Size(max=14)
+	@Size(max = 14)
 	@NotEmpty
 	private String doctorSnils;
 	@NotEmpty
@@ -29,12 +29,13 @@ public class AttachFormParameters {
 	@NotEmpty
 	private String dudlNum;
 	@NotEmpty
-	private String effDate = LocalDate.now().toString();
+	private String effDate;
 	private String expDate;
 	@Size(max = 200)
 	private String dudlPredst;
 	@NotNull
 	private Integer period = 90;
+	private Collection<Long> selectedRows;
 
 	public Integer getLpuId() {
 		return lpuId;
@@ -53,11 +54,13 @@ public class AttachFormParameters {
 	}
 
 	public void setPhone(String phone) {
-		this.phone = phone.trim();
+		if (phone != null)
+			this.phone = phone.trim();
 	}
 
 	public void setEmail(String email) {
-		this.email = email.trim();
+		if (email != null)
+			this.email = email.trim();
 	}
 
 	public String getLpuUnit() {
@@ -65,7 +68,8 @@ public class AttachFormParameters {
 	}
 
 	public void setLpuUnit(String lpuUnit) {
-		this.lpuUnit = lpuUnit.trim();
+		if (lpuUnit != null)
+			this.lpuUnit = lpuUnit.trim();
 	}
 
 	public String getDoctorSnils() {
@@ -73,7 +77,8 @@ public class AttachFormParameters {
 	}
 
 	public void setDoctorSnils(String doctorSnils) {
-		this.doctorSnils = doctorSnils.trim();
+		if (doctorSnils != null)
+			this.doctorSnils = doctorSnils.trim();
 	}
 
 	public String getDudlType() {
@@ -89,15 +94,18 @@ public class AttachFormParameters {
 	}
 
 	public void setDudlType(String dudlType) {
-		this.dudlType = dudlType.trim();
+		if (dudlType != null)
+			this.dudlType = dudlType.trim();
 	}
 
 	public void setDudlSer(String dudlSer) {
-		this.dudlSer = dudlSer;
+		if (dudlSer != null)
+			this.dudlSer = dudlSer;
 	}
 
 	public void setDudlNum(String dudlNum) {
-		this.dudlNum = dudlNum.trim();
+		if (dudlNum != null)
+			this.dudlNum = dudlNum.trim();
 	}
 
 	public String getEffDate() {
@@ -121,7 +129,8 @@ public class AttachFormParameters {
 	}
 
 	public void setDudlPredst(String dudlPredst) {
-		this.dudlPredst = dudlPredst.trim();
+		if (dudlPredst != null)
+			this.dudlPredst = dudlPredst.trim();
 	}
 
 	public Integer getPeriod() {
@@ -130,6 +139,14 @@ public class AttachFormParameters {
 
 	public void setPeriod(Integer period) {
 		this.period = period;
+	}
+
+	public Collection<Long> getSelectedRows() {
+		return selectedRows;
+	}
+
+	public void setSelectedRows(Collection<Long> selectedRows) {
+		this.selectedRows = selectedRows;
 	}
 
 }

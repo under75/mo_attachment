@@ -1,10 +1,14 @@
 package ru.sartfoms.moattach.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
@@ -12,8 +16,10 @@ import javax.persistence.Table;
 public class AttachOtherRegionsHist {
 	@Id
 	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_sequence")
+	@SequenceGenerator(name = "id_sequence", sequenceName = "LPUOWNER.ATTACH_OTHERREGIONS_SEQ", allocationSize = 1)
 	private Long id;
-	@Column(name = "attachId")
+	@Column(name = "attachid")
 	private Long attachid;
 	@Column(name = "aoguid")
 	private String aoguid;
@@ -24,13 +30,17 @@ public class AttachOtherRegionsHist {
 	@Column(name = "email")
 	private String email;
 	@Column(name = "lpuid")
-	private Long lpuId;
+	private Integer lpuId;
 	@Column(name = "lpuunit")
 	private String lpuUnit;
 	@Column(name = "doctorsnils")
 	private String doctorSnils;
 	@Column(name = "editdate")
-	private LocalDate editDate;
+	private LocalDateTime editDate;
+	@Column(name = "usr")
+	private String usr;
+	@Column(name = "expdate")
+	private LocalDate expDate;
 
 	public Long getId() {
 		return id;
@@ -56,7 +66,7 @@ public class AttachOtherRegionsHist {
 		return email;
 	}
 
-	public Long getLpuId() {
+	public Integer getLpuId() {
 		return lpuId;
 	}
 
@@ -68,7 +78,7 @@ public class AttachOtherRegionsHist {
 		return doctorSnils;
 	}
 
-	public LocalDate getEditDate() {
+	public LocalDateTime getEditDate() {
 		return editDate;
 	}
 
@@ -96,7 +106,7 @@ public class AttachOtherRegionsHist {
 		this.email = email;
 	}
 
-	public void setLpuId(Long lpuId) {
+	public void setLpuId(Integer lpuId) {
 		this.lpuId = lpuId;
 	}
 
@@ -108,8 +118,24 @@ public class AttachOtherRegionsHist {
 		this.doctorSnils = doctorSnils;
 	}
 
-	public void setEditDate(LocalDate editDate) {
+	public void setEditDate(LocalDateTime editDate) {
 		this.editDate = editDate;
 	}
 
+	public String getUsr() {
+		return usr;
+	}
+
+	public void setUsr(String usr) {
+		this.usr = usr;
+	}
+
+	public LocalDate getExpDate() {
+		return expDate;
+	}
+
+	public void setExpDate(LocalDate expDate) {
+		this.expDate = expDate;
+	}
+	
 }

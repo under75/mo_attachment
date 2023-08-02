@@ -19,4 +19,8 @@ public class DudlTypeService {
 		return dudlTypeRepository.findAllByOrderByDocName();
 	}
 
+	public DudlType findOne(String dudlType) {
+		return dudlTypeRepository.getReferenceById(dudlType);
+	}
+
 }

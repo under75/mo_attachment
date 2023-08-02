@@ -19,7 +19,7 @@
 					персоны в ФЕРЗЛ</a></li>
 			<li class="nav-item"><a class="nav-link active"
 				aria-current="page" href="#">Ввод информации о прикреплении</a></li>
-			<li class="nav-item"><a class="nav-link" href="#">Поиск прикрепленной
+			<li class="nav-item"><a class="nav-link" href="/lpu/attach/search">Поиск прикрепленной
 					персоны</a></li>
 			<li class="nav-item"><a class="nav-link disabled" href="#">Редактирование
 					информации о прикреплении</a></li>
@@ -439,7 +439,7 @@
 				</div>
 				<div class="col-sm">
 					<div class="form-group">
-						<label class="col-form-label col-form-label-sm" for="attachExpDate">Дата прикрепления</label> 
+						<label class="col-form-label col-form-label-sm" for="effDate">Дата прикрепления</label> 
 							<input type="date" th:field="*{formParams.effDate}"
 							id="effDate" class="form-control form-control-sm"
 							th:classappend="${#fields.hasErrors('formParams.effDate')} ? 'is-invalid' : ''"
@@ -448,7 +448,7 @@
 				</div>
 				<div class="col-sm-1">
 					<div class="form-group">
-						<label class="col-form-label col-form-label-sm" for="attachExpDate">Срок, дней</label> 
+						<label class="col-form-label col-form-label-sm" for="period">Срок, дней</label> 
 							<input type="number" min="1" max="366" th:field="*{formParams.period}"
 							id="period" class="form-control form-control-sm"
 							th:classappend="${#fields.hasErrors('formParams.period')} ? 'is-invalid' : ''"
@@ -512,7 +512,7 @@
 			            </div>
 			            <div class="modal-footer">
 			                <button type="button" class="btn btn-sm btn-secondary" onclick="location.href='/lpu/ferzl'">Вернуться к поиску</button>
-			                <button type="submit" class="btn btn-sm btn-primary" name="edit">Редактировать</button>
+			                <button type="button" th:onclick="|goToEdit(${attachOtherRegions.id})|" class="btn btn-sm btn-primary">Редактировать</button>
 			            </div>
 		            </div>
 	       		</div>
@@ -548,6 +548,9 @@
 			    </div>
 	  	    </div>
 		</form>
+		<form th:method="POST" th:action="@{/lpu/attach/edit}" id="editForm">
+			<input type="hidden" name="attachId">
+		</form>
 	</div>
 	<br/>
 	<footer class="text-center text-lg-start" th:fragment="footer"
@@ -582,6 +585,11 @@
 				const okatoModal = new bootstrap.Modal('#okatoModal');
 				okatoModal.show();
 			}
+		}
+		function goToEdit(attachId) {
+			form = document.getElementById('editForm');
+			form.attachId.value = attachId;
+			form.submit();
 		}
 	</script>
 	<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>

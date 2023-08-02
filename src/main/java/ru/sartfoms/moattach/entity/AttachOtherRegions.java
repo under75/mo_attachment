@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.thymeleaf.util.StringUtils;
+
 @Entity
 @Table(name = "ATTACH_OTHERREGIONS", schema = "LPUOWNER")
 public class AttachOtherRegions {
@@ -71,6 +73,8 @@ public class AttachOtherRegions {
 	private Integer period;
 	@Column(name = "dtins")
 	private LocalDateTime dtIns;
+	@Column(name="gender")
+	private Integer gender;
 	
 	public Long getId() {
 		return id;
@@ -85,13 +89,13 @@ public class AttachOtherRegions {
 		return expDate;
 	}
 	public String getLastName() {
-		return lastName;
+		return StringUtils.capitalize(lastName != null ? lastName.toLowerCase() : "");
 	}
 	public String getFirstName() {
-		return firstName;
+		return StringUtils.capitalize(firstName != null ? firstName.toLowerCase() : "");
 	}
 	public String getPatronymic() {
-		return patronymic;
+		return StringUtils.capitalize(patronymic != null ? patronymic.toLowerCase() : "");
 	}
 	public LocalDate getBirthDay() {
 		return birthDay;
@@ -237,4 +241,11 @@ public class AttachOtherRegions {
 	public void setDtIns(LocalDateTime dtIns) {
 		this.dtIns = dtIns;
 	}
+	public Integer getGender() {
+		return gender;
+	}
+	public void setGender(Integer gender) {
+		this.gender = gender;
+	}
+	
 }

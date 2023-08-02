@@ -19,7 +19,7 @@
 				aria-current="page" href="#">Поиск персоны в ФЕРЗЛ</a></li>
 			<li class="nav-item"><a class="nav-link disabled" href="#">Ввод
 					информации о прикреплении</a></li>
-			<li class="nav-item"><a class="nav-link" href="#">Поиск прикрепленной
+			<li class="nav-item"><a class="nav-link" href="/lpu/attach/search">Поиск прикрепленной
 					персоны</a></li>
 			<li class="nav-item"><a class="nav-link disabled" href="#">Редактирование
 					информации о прикреплении</a></li>
@@ -229,7 +229,7 @@
 	</form>
 	<footer class="text-center text-lg-start" th:fragment="footer"
 		th:insert="copyright"> </footer>
-	<script type="text/javascript">
+	<script th:inline="javascript">
 		document.getElementById("searchForm").onkeypress = function(e) {
 			var key = e.charCode || e.keyCode || 0;
 			if (key == 13) {

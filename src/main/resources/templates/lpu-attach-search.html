@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<title
+	th:text="${@environment.getProperty('app.name')} + ' - Учетное прикрепление застрахованных на других территориях'"></title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+</head>
+<body>
+	<div class="container">
+		<div th:insert="menu :: navbar"></div>
+		<h4 th:text="${lpu.name}"></h4>
+		<ul class="nav nav-tabs">
+			<li class="nav-item"><a class="nav-link" href="/lpu/ferzl">Поиск
+					персоны в ФЕРЗЛ</a></li>
+			<li class="nav-item"><a class="nav-link disabled" href="#">Ввод
+					информации о прикреплении</a></li>
+			<li class="nav-item"><a class="nav-link active"
+				aria-current="page" href="#">Поиск прикрепленной персоны</a></li>
+			<li class="nav-item"><a class="nav-link disabled" href="#">Редактирование
+					информации о прикреплении</a></li>
+		</ul>
+		<form th:method="POST" th:action="@{/lpu/attach/search}"
+			id="attachForm">
+			<input type="hidden" id="page" name="page" />
+			<div class="row">
+				<div class="col-sm-4">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="lpuSar">Медицинская
+							организация / подразделение</label> <select id="lpuSar"
+							th:field="*{formParams.lpuId}" class="form-select form-select-sm">
+							<option th:each="lpu : ${lpus}" th:value="${lpu.id}"
+								th:text="${lpu.name}" th:selected="${formParams.lpuId}"></option>
+						</select>
+					</div>
+				</div>
+				<div class="col-sm-1">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="lpuUnit">№
+							участка</label> <input id="lpuUnit" th:field="*{formParams.lpuUnit}"
+							class="form-control form-control-sm"
+							th:classappend="${#fields.hasErrors('formParams.lpuUnit')} ? 'is-invalid' : ''" />
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="doctorSnils">ФИО
+							врача</label> <select id="doctorSnils"
+							th:field="*{formParams.doctorSnils}"
+							class="form-select form-select-sm">
+							<option value=""></option>
+							<option th:each="doctor : ${doctors}" th:value="${doctor.snils}"
+								th:text="${doctor.lastName} +' '+${doctor.firstName} + ' '+${doctor.patronymic}"></option>
+						</select>
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="effDate">Дата
+							прикрепления с</label><input type="date" id="effDate"
+							class="form-control form-control-sm"
+							th:classappend="${#fields.hasErrors('formParams.effDate')} ? 'is-invalid' : ''"
+							th:field="${formParams.effDate}" />
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="expDate">по</label>
+						<input type="date" id="expDate"
+							class="form-control form-control-sm"
+							th:classappend="${#fields.hasErrors('formParams.expDate')} ? 'is-invalid' : ''"
+							th:field="${formParams.expDate}" />
+					</div>
+				</div>
+			</div>
+			<hr />
+			<div class="row">
+				<div class="col-sm">
+					<input type="submit" value="Поиск" class="btn btn-sm btn-primary"
+						name="search" />&nbsp;<input type="button" value="Очистить"
+						onclick="location.href='/lpu/attach/search'"
+						class="btn btn-sm btn-secondary" />&nbsp; <input type="button"
+						value="В Excel" th:onclick="|toExcel()|" class="btn btn-sm btn-primary" name="print" />
+				</div>
+			</div>
+			<div th:if="${dataPage != null && dataPage.content.size  > 0}">
+				<hr />
+				<table class="table table-sm table-hover">
+					<thead class="table-dark">
+						<tr class="small">
+							<th></th>
+							<th>Дата прикрепл.</th>
+							<th>Дата открепл.</th>
+							<th>ФИО</th>
+							<th>Дата рождения</th>
+							<th>Номер полиса</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="persData, iStat : ${dataPage.content}"
+							th:attr="data-id=${persData.id}" class='clickable-row small'>
+							<td><input class="form-check-input" type="checkbox"
+								th:id="'ch'+${persData.id}" th:value="${persData.id}"
+								th:checked="${formParams.selectedRows != null && formParams.selectedRows.contains(persData.id)}"
+								name="selectedRows" /></td>
+							<td
+								th:text="${#temporals.format(persData.effDate, 'dd.MM.yyyy')}" />
+							<td
+								th:text="${persData.expDate != null ? #temporals.format(persData.expDate, 'dd.MM.yyyy') : #temporals.format(persData.effDate.plusDays(persData.period), 'dd.MM.yyyy')}" />
+							<td
+								th:text="${persData.lastName + ' ' + persData.firstName + ' ' + persData.patronymic}" />
+							<td
+								th:text="${#temporals.format(persData.birthDay, 'dd.MM.yyyy')}" />
+							<td th:text="${persData.pcyNum}" />
+							<td><a href="#" th:onclick="|goToResult(${persData.id})|">Редактировать</a></td>
+						</tr>
+					</tbody>
+				</table>
+				<nav aria-label="Pagination" th:if="${dataPage.totalPages gt 0}">
+					<ul
+						class="pagination pagination-sm justify-content-center font-weight-medium">
+						<li class="page-item"
+							th:classappend="${dataPage.number eq 0} ? 'disabled'">
+							<button type="button" class="btn btn-sm btn-link"
+								th:classappend="${dataPage.number eq 0} ? 'disabled'"
+								th:onclick="|goToPage(${dataPage.number lt 2 ? 1 : dataPage.number})|">
+								<p>&#60;&#60;
+								<p>
+							</button>
+						</li>
+						<li class="page-item"
+							th:classappend="${i eq dataPage.number + 1} ? 'active'"
+							th:each="i : ${#numbers.sequence(dataPage.totalPages > dataPage.number + 10 ? dataPage.number + 1 : dataPage.totalPages - 10 > 0 ? dataPage.totalPages - 10 : 1, dataPage.totalPages > 10 + dataPage.number ? dataPage.number + 10 : dataPage.totalPages, 1)}">
+							<a class="page-link" href="#" th:onclick="|goToPage(${i})|"
+							th:text="${i}"><span class="sr-only">(current)</span></a>
+						</li>
+						<li class="page-item disabled"
+							th:if="${dataPage.number + 10 < dataPage.totalPages}"><a
+							class="page-link" href="#"> ... </a></li>
+						<li class="page-item"
+							th:classappend="${dataPage.number + 1 eq dataPage.totalPages} ? 'disabled'">
+							<button type="button" class="btn btn-sm btn-link"
+								th:classappend="${dataPage.number + 1 eq dataPage.totalPages} ? 'disabled'"
+								th:onclick="|goToPage(${dataPage.number + 2})|">
+								<p>&#62;&#62;
+								<p>
+							</button>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</form>
+	</div>
+	<form th:method="POST" th:action="@{/lpu/attach/edit}" id="resForm">
+		<input type="hidden" name="attachId" />
+	</form>
+	<footer class="text-center text-lg-start" th:fragment="footer"
+		th:insert="copyright"> </footer>
+	<script th:inline="javascript">
+		function goToPage(page) {
+			document.getElementById("attachForm").page.value = page;
+			document.getElementById("attachForm").submit();
+		}
+		function goToResult(id) {
+			form = document.getElementById("resForm");
+			form.attachId.value = id;
+			form.submit();
+		}
+		function toExcel() {
+			form = document.getElementById("attachForm");	
+			form.action = "/lpu/attach/excel";
+			form.submit();
+			form.action = "/lpu/attach/search";
+		}
+	</script>
+	<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
