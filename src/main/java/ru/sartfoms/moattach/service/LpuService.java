@@ -20,7 +20,7 @@ public class LpuService {
 	}
 
 	public Collection<Lpu> findByParentId(Integer id) {
-		return lpuRepository.findByParentIdAndFlagMOrderByName(id, 1);
+		return lpuRepository.findByParentIdOrderByName(id);
 	}
 
 }

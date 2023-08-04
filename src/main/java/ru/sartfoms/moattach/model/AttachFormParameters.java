@@ -1,7 +1,5 @@
 package ru.sartfoms.moattach.model;
 
-import java.util.Collection;
-
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -35,7 +33,6 @@ public class AttachFormParameters {
 	private String dudlPredst;
 	@NotNull
 	private Integer period = 90;
-	private Collection<Long> selectedRows;
 
 	public Integer getLpuId() {
 		return lpuId;
@@ -140,13 +137,4 @@ public class AttachFormParameters {
 	public void setPeriod(Integer period) {
 		this.period = period;
 	}
-
-	public Collection<Long> getSelectedRows() {
-		return selectedRows;
-	}
-
-	public void setSelectedRows(Collection<Long> selectedRows) {
-		this.selectedRows = selectedRows;
-	}
-
 }

@@ -9,6 +9,6 @@ import ru.sartfoms.moattach.entity.Lpu;
 public interface LpuRepository extends JpaRepository<Lpu, Integer> {
 
 
-	Collection<Lpu> findByParentIdAndFlagMOrderByName(Integer id, int i);
+	Collection<Lpu> findByParentIdOrderByName(Integer id);
 
 }

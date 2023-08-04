@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -327,7 +330,7 @@ public class LpuController {
 	}
 
 	@GetMapping("/lpu/attach/search")
-	public String searchAttachment(Model model) {
+	public String searchAttachment(Model model, HttpSession session) {
 
 		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
 		Lpu lpu = lpuService.getById(user.getLpuId());
@@ -340,6 +343,9 @@ public class LpuController {
 			lpus.addAll(lpuService.findByParentId(lpu.getId()));
 		}
 		model.addAttribute("lpus", lpus);
+
+		model.addAttribute("lpuUnits", attachOtherRegionsService.findByParams(lpu.getId(), null, null, null, null)
+				.stream().map(t -> t.getLpuUnit()).distinct().collect(Collectors.toList()));
 
 		AttachFormParameters formParams = new AttachFormParameters();
 		formParams.setLpuId(lpu.getId());
@@ -355,13 +361,16 @@ public class LpuController {
 		Optional<Integer> page = Optional.of(1);
 		Page<AttachOtherRegions> dataPage = attachOtherRegionsService.getDataPage(formParams.getLpuId(), page);
 		model.addAttribute("dataPage", dataPage);
+		session.setAttribute("dataPage", dataPage);
 
 		return "lpu-attach-search";
 	}
 
+	@SuppressWarnings("unchecked")
 	@PostMapping("/lpu/attach/search")
 	public String searchAttachment(Model model, @ModelAttribute("formParams") AttachFormParameters formParams,
-			BindingResult bindingResult, @RequestParam("page") Optional<Integer> page) {
+			BindingResult bindingResult, @RequestParam("page") Optional<Integer> page,
+			@RequestParam("excel") Optional<?> excel, HttpSession session) {
 
 		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
 		Lpu lpu = lpuService.getById(user.getLpuId());
@@ -374,6 +383,9 @@ public class LpuController {
 			lpus.addAll(lpuService.findByParentId(lpu.getId()));
 		}
 		model.addAttribute("lpus", lpus);
+		
+		model.addAttribute("lpuUnits", attachOtherRegionsService.findByParams(lpu.getId(), null, null, null, null)
+				.stream().map(t -> t.getLpuUnit()).distinct().collect(Collectors.toList()));
 
 		Collection<MedMz> doctors = new ArrayList<MedMz>();
 		if (lpu != null) {
@@ -384,27 +396,28 @@ public class LpuController {
 
 		attachOtherRegionsService.validate(formParams, bindingResult);
 		Page<AttachOtherRegions> dataPage;
-		if (bindingResult.hasErrors()) {
-			dataPage = attachOtherRegionsService.getDataPage(formParams.getLpuId(), page);
+		if (bindingResult.hasErrors() || page.isPresent()) {
+			dataPage = (Page<AttachOtherRegions>) session.getAttribute("dataPage");
 		} else {
+			if (excel.isPresent()) {
+				return "forward:/lpu/attach/excel";
+			}
 			dataPage = attachOtherRegionsService.getDataPage(formParams, page);
+			session.setAttribute("dataPage", dataPage);
 		}
 		model.addAttribute("dataPage", dataPage);
 
 		return "lpu-attach-search";
 	}
-	
+
 	@PostMapping("/lpu/attach/excel")
 	@ResponseBody
-	public ResponseEntity<?> download(Model model, @ModelAttribute("searchParams") AttachFormParameters searchParams) {
-		if (searchParams.getSelectedRows() == null) {
-			return new ResponseEntity<String>("<h1>Не выбраны строки для отчета в Excel</h1>", HttpStatus.BAD_REQUEST);
-		}
+	public ResponseEntity<?> download(Model model, @ModelAttribute("formParams") AttachFormParameters formParams) {
 		ResponseEntity<?> resource;
 		try {
 			resource = ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=report.xlsx")
 					.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
-					.body(new InputStreamResource(excelService.createExcel(searchParams.getSelectedRows(), lpuService.getById(searchParams.getLpuId()))));
+					.body(new InputStreamResource(excelService.createExcel(formParams)));
 		} catch (IOException | ExcelGeneratorException e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}

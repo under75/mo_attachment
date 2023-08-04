@@ -2,6 +2,7 @@ package ru.sartfoms.moattach.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.Collection;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -12,23 +13,42 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.springframework.stereotype.Service;
 
+import ru.sartfoms.moattach.dao.AttachOtherRegionsDao;
 import ru.sartfoms.moattach.entity.AttachOtherRegions;
+import ru.sartfoms.moattach.entity.DudlType;
 import ru.sartfoms.moattach.entity.Lpu;
+import ru.sartfoms.moattach.entity.MedMz;
 import ru.sartfoms.moattach.exception.ExcelGeneratorException;
-import ru.sartfoms.moattach.repository.AttachOtherRegionsRepository;
+import ru.sartfoms.moattach.model.AttachFormParameters;
 import ru.sartfoms.moattach.util.ExcelGenerator;
 
 @Service
 public class ExcelService {
-	private final AttachOtherRegionsRepository attachOtherRegionsRepository;
+	private final LpuService lpuService;
+	private final MedMzService medMzService;
+	private final DudlTypeService dudlTypeService;
+	private final AddressService addressService;
+	private final AttachOtherRegionsDao attachOtherRegionsDao;
 
-	public ExcelService(AttachOtherRegionsRepository attachOtherRegionsRepository) {
-		this.attachOtherRegionsRepository = attachOtherRegionsRepository;
+	public ExcelService(AttachOtherRegionsDao attachOtherRegionsDao, MedMzService medMzService, LpuService lpuService,
+			DudlTypeService dudlTypeService, AddressService addressService) {
+		this.lpuService = lpuService;
+		this.medMzService = medMzService;
+		this.dudlTypeService = dudlTypeService;
+		this.addressService = addressService;
+		this.attachOtherRegionsDao = attachOtherRegionsDao;
 	}
 
-	public InputStream createExcel(Collection<Long> selectedRows, Lpu lpu) throws IOException, ExcelGeneratorException {
+	public InputStream createExcel(AttachFormParameters formParams) throws IOException, ExcelGeneratorException {
+		LocalDate effDateMin = formParams.getEffDate().isEmpty() ? null : LocalDate.parse(formParams.getEffDate());
+		LocalDate effDateMax = formParams.getExpDate().isEmpty() ? null : LocalDate.parse(formParams.getExpDate());
 
-		return new ExcelGenerator(attachOtherRegionsRepository.findAllByIdInOrderByEffDateDesc(selectedRows)) {
+		Lpu lpu = lpuService.getById(formParams.getLpuId());
+		Collection<MedMz> doctors = medMzService.findByLpuId(lpu.getParentId() != 0 ? lpu.getParentId() : lpu.getId());
+		Collection<DudlType> dudlTypes = dudlTypeService.findAll();
+
+		return new ExcelGenerator(attachOtherRegionsDao.findByParams(formParams.getLpuId(), formParams.getLpuUnit(),
+				formParams.getDoctorSnils(), effDateMin, effDateMax)) {
 
 			@SuppressWarnings("unchecked")
 			@Override
@@ -59,9 +79,26 @@ public class ExcelService {
 					setCellValue(createCellAndFormat(row, column++, bodyStyleAlignmentCenter),
 							rowData.getGender().intValue() == 1 ? "М"
 									: rowData.getGender().intValue() == 2 ? "Ж" : "?");
-					setCellValue(createCellAndFormat(row, column++, bodyStyleAlignmentCenter), rowData.getPcyNum());
+					setCellValue(createCellAndFormat(row, column++, bodyStyleAlignmentCenter),
+							(rowData.getPcySer() != null ? rowData.getPcySer() + " " : "") + rowData.getPcyNum());
+					setCellValue(createCellAndFormat(row, column++, bodyStyleAlignmentLeft),
+							(dudlTypes.stream().filter(t -> t.getDocCode().equals(rowData.getDudlType())).count() > 0
+									? dudlTypes.stream().filter(t -> t.getDocCode().equals(rowData.getDudlType()))
+											.findAny().get().getDocName()
+									: "") + (rowData.getDudlSer() != null ? " " + rowData.getDudlSer() : "")
+									+ (rowData.getDudlNum() != null ? " " + rowData.getDudlNum() : ""));
+					setCellValue(createCellAndFormat(row, column++, bodyStyleAlignmentLeft),
+							(rowData.getPhone() != null ? "тел.: " + rowData.getPhone() : "")
+									+ (rowData.getEmail() != null
+											? (rowData.getPhone() != null ? ", " : "") + "email: " + rowData.getEmail()
+											: ""));
+					setCellValue(createCellAndFormat(row, column++, bodyStyleAlignmentLeft),
+							addressService.getAddrStr(rowData.getAoguidpr(), rowData.getHsguidpr()));
 					setCellValue(createCellAndFormat(row, column++, bodyStyleAlignmentLeft), rowData.getLpuUnit());
-					setCellValue(createCellAndFormat(row, column++, bodyStyleAlignmentLeft), rowData.getDoctorsnils());
+					setCellValue(createCellAndFormat(row, column++, bodyStyleAlignmentLeft),
+							doctors.stream().filter(t -> t.getSnils().equals(rowData.getDoctorsnils()))
+									.map(t -> t.getLastName() + " " + t.getFirstName() + " " + t.getPatronymic())
+									.findAny().get());
 					if (rowData.getExpDate() != null) {
 						setCellValue(createCellAndFormat(row, column++, bodyStyleAlignmentLeft),
 								rowData.getEffDate().format(DATE_FORMATTER) + " - "
@@ -98,8 +135,8 @@ public class ExcelService {
 				headerStyle.setBorderRight(BorderStyle.DASHED);
 				headerStyle.setBorderTop(BorderStyle.DASHED);
 
-				columns = new String[] { "№", "Фамилия", "Имя", "Отчество", "Дата рожд.", "Пол", "Полис", "Участок",
-						"ФИО доктора", "Период" };
+				columns = new String[] { "№", "Фамилия", "Имя", "Отчество", "Дата рожд.", "Пол", "Полис", "ДУдЛ",
+						"Контакт", "Адрес проживания", "Участок", "ФИО доктора", "Период" };
 
 				XSSFRow row0 = sheet.createRow(0);
 				setCellValue(createCellAndFormat(row0, 0, titleStyle),

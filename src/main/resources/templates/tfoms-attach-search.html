@@ -13,26 +13,27 @@
 <body>
 	<div class="container">
 		<div th:insert="menu :: navbar"></div>
-		<h4 th:text="${lpu.name}"></h4>
-		<ul class="nav nav-tabs">
-			<li class="nav-item"><a class="nav-link" href="/lpu/ferzl">Поиск
-					персоны в ФЕРЗЛ</a></li>
-			<li class="nav-item"><a class="nav-link disabled" href="#">Ввод
-					информации о прикреплении</a></li>
-			<li class="nav-item"><a class="nav-link active"
-				aria-current="page" href="#">Поиск прикрепленной персоны</a></li>
-			<li class="nav-item"><a class="nav-link disabled" href="#">Редактирование
-					информации о прикреплении</a></li>
-		</ul>
-		<form th:method="POST" th:action="@{/lpu/attach/search}"
+		<form th:method="POST" th:action="@{/tfoms/attach/search}"
 			id="attachForm">
 			<input type="hidden" id="page" name="page" />
 			<div class="row">
 				<div class="col-sm-4">
 					<div class="form-group">
-						<label class="col-form-label col-form-label-sm" for="lpuSar">Медицинская
-							организация / подразделение</label> <select id="lpuSar"
+						<label class="col-form-label col-form-label-sm" for="mo">Медицинская
+							организация </label> <select id="mo" th:field="*{formParams.moId}"
+							class="form-select form-select-sm" onchange="this.form.submit()">
+							<option value=""></option>
+							<option th:each="lpu : ${mos}" th:value="${lpu.id}"
+								th:text="${lpu.name}" th:selected="${formParams.moId}"></option>
+						</select>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="lpu">Подразделение</label>
+						<select id="lpu" onchange="this.form.submit()"
 							th:field="*{formParams.lpuId}" class="form-select form-select-sm">
+							<option value=""></option>
 							<option th:each="lpu : ${lpus}" th:value="${lpu.id}"
 								th:text="${lpu.name}" th:selected="${formParams.lpuId}"></option>
 						</select>
@@ -43,8 +44,7 @@
 						<label for="lpuUnit" class="col-form-label col-form-label-sm">№
 							участка</label> <input th:field="*{formParams.lpuUnit}"
 							class="form-control form-control-sm" list="lpuUnitOptions"
-							id="lpuUnit" placeholder="Поиск..."
-							th:classappend="${#fields.hasErrors('formParams.lpuUnit')} ? 'is-invalid' : ''">
+							id="lpuUnit" placeholder="Поиск...">
 						<datalist id="lpuUnitOptions">
 							<option th:each="unit : ${lpuUnits}" th:value="${unit}">
 						</datalist>
@@ -53,7 +53,7 @@
 				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="doctorSnils">ФИО
-							врача</label> <select id="doctorSnils"
+							врача</label> <select id="doctorSnils" onchange="this.form.submit()"
 							th:field="*{formParams.doctorSnils}"
 							class="form-select form-select-sm">
 							<option value=""></option>
@@ -62,7 +62,9 @@
 						</select>
 					</div>
 				</div>
-				<div class="col-sm-2">
+			</div>
+			<div class="row">
+				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="effDate">Дата
 							прикрепления с</label><input type="date" id="effDate"
@@ -71,7 +73,7 @@
 							th:field="${formParams.effDate}" />
 					</div>
 				</div>
-				<div class="col-sm-2">
+				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="expDate">по</label>
 						<input type="date" id="expDate"
@@ -80,13 +82,53 @@
 							th:field="${formParams.expDate}" />
 					</div>
 				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="lastName">Фамилия
+						</label> <input type="text" th:field="*{formParams.lastName}"
+							id="lastName" class="form-control form-control-sm"
+							placeholder="фамилия" />
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="firstName">Имя
+						</label> <input type="text" th:field="*{formParams.firstName}"
+							id="firstName" class="form-control form-control-sm"
+							placeholder="имя" />
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="patronymic">Отчество</label>
+						<input type="text" th:field="*{formParams.patronymic}"
+							id="patronymic" class="form-control form-control-sm"
+							placeholder="отчество" />
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="birthDay">Дата
+							рождения</label><input type="date" th:field="*{formParams.birthDay}"
+							id="birthDay" class="form-control form-control-sm"
+							th:classappend="${#fields.hasErrors('formParams.birthDay')} ? 'is-invalid' : ''" />
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="policyNum">Номер
+							полиса / ЕНП</label> <input type="text"
+							th:field="*{formParams.policyNum}" id="policyNum"
+							class="form-control form-control-sm" placeholder="номер" />
+					</div>
+				</div>
 			</div>
 			<hr />
 			<div class="row">
 				<div class="col-sm">
 					<input type="submit" value="Поиск" class="btn btn-sm btn-primary"
 						name="search" />&nbsp;<input type="button" value="Очистить"
-						onclick="location.href='/lpu/attach/search'"
+						onclick="location.href='/tfoms/attach/search'"
 						class="btn btn-sm btn-secondary" />&nbsp; <input type="submit"
 						value="В Excel" class="btn btn-sm btn-primary" name="excel" />
 				</div>
@@ -116,7 +158,7 @@
 							<td
 								th:text="${#temporals.format(persData.birthDay, 'dd.MM.yyyy')}" />
 							<td th:text="${persData.pcyNum}" />
-							<td><a href="#" th:onclick="|goToResult(${persData.id})|">Редактировать</a></td>
+							<td><a href="#" th:onclick="|goToResult(${persData.id})|">Просмотр</a></td>
 						</tr>
 					</tbody>
 				</table>
@@ -155,9 +197,6 @@
 			</div>
 		</form>
 	</div>
-	<form th:method="POST" th:action="@{/lpu/attach/edit}" id="resForm">
-		<input type="hidden" name="attachId" />
-	</form>
 	<footer class="text-center text-lg-start" th:fragment="footer"
 		th:insert="copyright"> </footer>
 	<script th:inline="javascript">
@@ -166,9 +205,6 @@
 			document.getElementById("attachForm").submit();
 		}
 		function goToResult(id) {
-			form = document.getElementById("resForm");
-			form.attachId.value = id;
-			form.submit();
 		}
 	</script>
 	<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>

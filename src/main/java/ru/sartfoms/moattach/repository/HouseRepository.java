@@ -18,4 +18,6 @@ public interface HouseRepository extends JpaRepository<House, HouseId> {
 	@Query("select h from House h where lower(h.houseNum) like lower(?2) and h.objectid in (select distinct aah.objectid from AsAdmHierarchy aah where aah.parentobjid = ?1) order by h.houseNum")
 	Collection<House> findHousesByParentAndHouseNumContainingIgnoreCase(Long objectid, String filter);
 
+	House findByObjectidAndIsActual(Long objid, boolean b);
+
 }

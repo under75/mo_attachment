@@ -2,6 +2,7 @@ package ru.sartfoms.moattach.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import ru.sartfoms.moattach.entity.Policy;
 import ru.sartfoms.moattach.entity.User;
 import ru.sartfoms.moattach.model.AttachFormParameters;
 import ru.sartfoms.moattach.model.Gar;
+import ru.sartfoms.moattach.model.SearchFormParameters;
 import ru.sartfoms.moattach.repository.AttachOtherRegionsRepository;
 import ru.sartfoms.moattach.util.DateValidator;
 
@@ -138,7 +140,7 @@ public class AttachOtherRegionsService {
 		PageRequest pageRequest = PageRequest.of(currentPage - 1, PAGE_SIZE);
 		LocalDate effDateMin = formParams.getEffDate().isEmpty() ? null : LocalDate.parse(formParams.getEffDate());
 		LocalDate effDateMax = formParams.getExpDate().isEmpty() ? null : LocalDate.parse(formParams.getExpDate());
-		
+
 		return attachOtherRegionsDao.getDataPage(formParams.getLpuId(), formParams.getLpuUnit(),
 				formParams.getDoctorSnils(), effDateMin, effDateMax, pageRequest);
 	}
@@ -157,11 +159,46 @@ public class AttachOtherRegionsService {
 		if (formParams.getDoctorSnils() != null && formParams.getDoctorSnils().length() > 14) {
 			bindingResult.rejectValue("doctorSnils", null);
 		}
-		if (!formParams.getEffDate().isEmpty() && !DateValidator.isValid(formParams.getEffDate())) {
+		if (formParams.getEffDate() != null && !formParams.getEffDate().isEmpty()
+				&& !DateValidator.isValid(formParams.getEffDate())) {
 			bindingResult.rejectValue("effDate", null);
 		}
-		if (!formParams.getExpDate().isEmpty() && !DateValidator.isValid(formParams.getExpDate())) {
+		if (formParams.getExpDate() != null && !formParams.getExpDate().isEmpty()
+				&& !DateValidator.isValid(formParams.getExpDate())) {
 			bindingResult.rejectValue("expDate", null);
 		}
+	}
+
+	public Collection<AttachOtherRegions> findByParams(Integer lpuId, String lpuUnit, String doctorSnils,
+			LocalDate effDateMin, LocalDate effDateMax) {
+		return attachOtherRegionsDao.findByParams(lpuId, lpuUnit, doctorSnils, effDateMin, effDateMax);
+	}
+
+	public void validate(SearchFormParameters formParams, BindingResult bindingResult) {
+		if (formParams.getEffDate() != null && !formParams.getEffDate().isEmpty()
+				&& !DateValidator.isValid(formParams.getEffDate())) {
+			bindingResult.rejectValue("effDate", null);
+		}
+		if (formParams.getExpDate() != null && !formParams.getExpDate().isEmpty()
+				&& !DateValidator.isValid(formParams.getExpDate())) {
+			bindingResult.rejectValue("expDate", null);
+		}
+		if (formParams.getBirthDay() != null && !formParams.getBirthDay().isEmpty()
+				&& !DateValidator.isValid(formParams.getBirthDay())) {
+			bindingResult.rejectValue("birthDay", null);
+		}
+	}
+
+	public Page<AttachOtherRegions> getDataPage(SearchFormParameters formParams, Optional<Integer> page) {
+		int currentPage = page.orElse(1);
+		PageRequest pageRequest = PageRequest.of(currentPage - 1, PAGE_SIZE);
+		LocalDate effDateMin = formParams.getEffDate().isEmpty() ? null : LocalDate.parse(formParams.getEffDate());
+		LocalDate effDateMax = formParams.getExpDate().isEmpty() ? null : LocalDate.parse(formParams.getExpDate());
+		LocalDate birthDay = formParams.getBirthDay().isEmpty() ? null : LocalDate.parse(formParams.getBirthDay());
+
+		return attachOtherRegionsDao.getDataPage(formParams.getMoId(), formParams.getLpuId(), formParams.getLpuUnit(),
+				formParams.getDoctorSnils(), effDateMin, effDateMax, formParams.getLastName(),
+				formParams.getFirstName(), formParams.getPatronymic(), birthDay, formParams.getPolicyNum(),
+				pageRequest);
 	}
 }
