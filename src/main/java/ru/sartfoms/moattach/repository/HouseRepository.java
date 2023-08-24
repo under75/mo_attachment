@@ -11,6 +11,8 @@ import ru.sartfoms.moattach.entity.HouseId;
 public interface HouseRepository extends JpaRepository<House, HouseId> {
 
 	House findByObjectguidAndIsActual(String hsguid, boolean b);
+	
+	House findByIdAndIsActual(Long id, boolean b);
 
 	@Query("select h from House h where h.objectid in (select distinct aah.objectid from AsAdmHierarchy aah where aah.parentobjid = ?1) order by h.houseNum")
 	Collection<House> findHousesByParent(Long objectid);

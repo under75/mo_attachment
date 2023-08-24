@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import ru.sartfoms.moattach.entity.Address;
 import ru.sartfoms.moattach.entity.AsAddrObj;
+import ru.sartfoms.moattach.entity.AttachOtherRegions;
 import ru.sartfoms.moattach.entity.House;
 import ru.sartfoms.moattach.model.ActualStatus;
 import ru.sartfoms.moattach.model.Gar;
@@ -351,7 +352,8 @@ public class AddressService {
 			initGarPr(gar, path);
 		}
 		gar.setLev1Rg(findLevel1());
-		gar.setLev1Pr(findLevel1());
+//		gar.setLev1Pr(findLevel1());
+		gar.setLev1Pr(findLevel1ByNameContainingIgnoreCase(gar.getFlev1Pr()));
 	}
 
 	public String getAddrRgStr(Gar gar) {
@@ -371,7 +373,7 @@ public class AddressService {
 					.filter(t -> t.getId().longValue() == gar.getIdlev3Rg().longValue() && t.getIsActual())
 					.map(t -> t.getName() + " " + t.getTypename()).findFirst().get().trim());
 		}
-		if (gar.getIdlev4Rg() != null) {
+		if (gar.getIdlev4Rg() != null && gar.getLev4Rg() != null) {
 			result.append(", " + gar.getLev4Rg().stream()
 					.filter(t -> t.getId().longValue() == gar.getIdlev4Rg() && t.getIsActual())
 					.map(t -> t.getName() + " " + t.getTypename()).findFirst().get().trim());
@@ -450,6 +452,13 @@ public class AddressService {
 		}
 
 		return builder.toString().trim();
+	}
+
+	public boolean isAddrPrModified(Gar gar, AttachOtherRegions attachOtherRegions) {
+		String hsguidprOld = attachOtherRegions.getHsguidpr();
+		String hsguidprNew = houseRepository.findByIdAndIsActual(gar.getIdlev5Pr(), true).getObjectguid();
+
+		return !hsguidprOld.equals(hsguidprNew);
 	}
 
 }

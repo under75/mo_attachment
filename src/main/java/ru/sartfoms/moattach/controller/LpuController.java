@@ -2,6 +2,7 @@ package ru.sartfoms.moattach.controller;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -21,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.validation.SmartValidator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -59,6 +61,7 @@ import ru.sartfoms.moattach.service.PersonDataService;
 import ru.sartfoms.moattach.service.PersonService;
 import ru.sartfoms.moattach.service.PolicyService;
 import ru.sartfoms.moattach.service.UserService;
+import ru.sartfoms.moattach.service.WordService;
 import ru.sartfoms.moattach.util.DateValidator;
 
 @Controller
@@ -78,6 +81,7 @@ public class LpuController {
 	private final AttachOtherRegionsService attachOtherRegionsService;
 	private final AttachOtherRegionsHistService attachOtherRegionsHistService;
 	private final ExcelService excelService;
+	private final WordService wordService;
 	@Autowired
 	SmartValidator validator;
 
@@ -86,7 +90,8 @@ public class LpuController {
 			PolicyService policyService, DudlService dudlService, AddressService addressService,
 			AttachService attachService, ContactService contactService, MedMzService medMzService,
 			AttachOtherRegionsService attachOtherRegionsService,
-			AttachOtherRegionsHistService attachOtherRegionsHistService, ExcelService excelService) {
+			AttachOtherRegionsHistService attachOtherRegionsHistService, ExcelService excelService,
+			WordService wordService) {
 		this.userService = userService;
 		this.lpuService = lpuService;
 		this.dudlTypeService = dudlTypeService;
@@ -102,6 +107,7 @@ public class LpuController {
 		this.attachOtherRegionsService = attachOtherRegionsService;
 		this.attachOtherRegionsHistService = attachOtherRegionsHistService;
 		this.excelService = excelService;
+		this.wordService = wordService;
 	}
 
 	@GetMapping("/lpu/ferzl")
@@ -150,7 +156,7 @@ public class LpuController {
 			@RequestParam("rid") Long rid, @ModelAttribute("formParams") AttachFormParameters formParams,
 			BindingResult bindingResult, @RequestParam("rgaddr") Optional<Integer> rgaddr,
 			@RequestParam("cntnr") Optional<Integer> cntnr, @RequestParam("nrdudl") Optional<Integer> nrdudl,
-			@RequestParam("save") Optional<String> save) {
+			@RequestParam("save") Optional<String> save, @RequestParam("print") Optional<String> print) {
 
 		model.addAttribute("rid", rid);
 		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -173,7 +179,7 @@ public class LpuController {
 
 		Policy policy = policyService.findByRid(rid).stream().max(Comparator.comparing(Policy::getPcyDateB)).get();
 		AttachOtherRegions attachOtherRegions = attachOtherRegionsService
-				.findByPcyNum(policy.getEnp() != null ? policy.getEnp() : policy.getPcyNum());
+				.getEffAttachByPcyNum(policy.getEnp() != null ? policy.getEnp() : policy.getPcyNum());
 		Person person = personService.findAllByRid(rid).stream().findAny().get();
 		model.addAttribute("person", person);
 		model.addAttribute("attachOtherRegions", attachOtherRegions);
@@ -211,10 +217,9 @@ public class LpuController {
 		if (rgaddr.isPresent()) {
 			// initialize from FERZL by the registration address
 			addressService.initGarRgFromFerzl(gar, rgAddresses, rgaddr.get());
-		} else {
-			// set by UI
-			addressService.setGarLevels(gar);
 		}
+		// set by UI
+		addressService.setGarLevels(gar);
 
 		Collection<MedMz> doctors = new ArrayList<MedMz>();
 		if (formParams.getLpuId() != null) {
@@ -225,16 +230,30 @@ public class LpuController {
 
 		model.addAttribute("personAge", personService.getAge(person));
 
-		if (save.isPresent()) {
+		if (save.isPresent() || print.isPresent()) {
 			validator.validate(formParams, bindingResult);
 			validator.validate(gar, bindingResult2);
-			if (!DateValidator.isValid(formParams.getEffDate()))
+			if (!DateValidator.isValid(formParams.getEffDate())
+					|| DateValidator.isAfterTnanNow(formParams.getEffDate()))
 				bindingResult.rejectValue("effDate", null);
 			if ((int) model.getAttribute("personAge") < PersonService.MAX_CHILD_AGE) {
 				if (formParams.getDudlPredst().isEmpty())
 					bindingResult.rejectValue("dudlPredst", null);
 			}
-			if (!bindingResult.hasErrors() && !bindingResult2.hasErrors()) {
+			AttachOtherRegions attachLast = attachOtherRegionsService
+					.getLastAttachByPcyNum(policy.getEnp() != null ? policy.getEnp() : policy.getPcyNum());
+			LocalDate now = LocalDate.now();
+			if (attachLast != null && formParams.getLpuId() != null
+					&& lpuService.isLpuChanged(formParams.getLpuId(), attachLast.getLpuId())
+					&& (attachLast.getContract().isAfter(now) || attachLast.getContract().equals(now))
+					&& !addressService.isAddrPrModified(gar, attachLast)) {
+				bindingResult.addError(new ObjectError("globalError",
+						"Персона была прикреплена к другой МО. Гражданин может поменять МО только при смене адреса проживания либо после "
+								+ attachLast.getContract().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))));
+			} else if (!bindingResult.hasErrors() && !bindingResult2.hasErrors()) {
+				if (print.isPresent()) {
+					return "forward:/lpu/attach/word";
+				}
 				AttachOtherRegions attachOtherRegionsEff = attachOtherRegionsService.attach(user, formParams, gar,
 						person, policy);
 				model.addAttribute("attachOtherRegions", attachOtherRegionsEff);
@@ -247,6 +266,7 @@ public class LpuController {
 		}
 
 		Boolean personAttached = attachOtherRegions != null
+				&& !lpuService.isLpuChanged(lpu.getId(), attachOtherRegions.getLpuId())
 				&& attachOtherRegionsService.isAttachEffective(attachOtherRegions);
 		model.addAttribute("personAttached", personAttached);
 
@@ -292,8 +312,12 @@ public class LpuController {
 			formParams.setLpuUnit(attachOtherRegions.getLpuUnit());
 			formParams.setDoctorSnils(attachOtherRegions.getDoctorsnils());
 			formParams.setExpDate(LocalDate.now().toString());
-		} else
+			formParams.setDudlNum(attachOtherRegions.getDudlNum());
+			formParams.setDudlType(attachOtherRegions.getDudlType());
+			formParams.setEffDate(attachOtherRegions.getEffDate().toString());
+		} else {
 			addressService.setGarLevels(gar);
+		}
 
 		Collection<MedMz> doctors = new ArrayList<MedMz>();
 		if (formParams.getLpuId() != null) {
@@ -383,7 +407,7 @@ public class LpuController {
 			lpus.addAll(lpuService.findByParentId(lpu.getId()));
 		}
 		model.addAttribute("lpus", lpus);
-		
+
 		model.addAttribute("lpuUnits", attachOtherRegionsService.findByParams(lpu.getId(), null, null, null, null)
 				.stream().map(t -> t.getLpuUnit()).distinct().collect(Collectors.toList()));
 
@@ -412,13 +436,36 @@ public class LpuController {
 
 	@PostMapping("/lpu/attach/excel")
 	@ResponseBody
-	public ResponseEntity<?> download(Model model, @ModelAttribute("formParams") AttachFormParameters formParams) {
+	public ResponseEntity<?> toExcel(Model model, @ModelAttribute("formParams") AttachFormParameters formParams) {
 		ResponseEntity<?> resource;
 		try {
 			resource = ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=report.xlsx")
 					.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
 					.body(new InputStreamResource(excelService.createExcel(formParams)));
 		} catch (IOException | ExcelGeneratorException e) {
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return resource;
+	}
+
+	@PostMapping("/lpu/attach/word")
+	@ResponseBody
+	public ResponseEntity<?> toWord(Model model, @ModelAttribute("formParams") AttachFormParameters formParams,
+			@ModelAttribute("gar") Gar gar, @RequestParam("rid") Long rid) {
+		ResponseEntity<?> resource;
+		try {
+			User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
+			addressService.setGarLevels(gar);
+			Person person = personService.findAllByRid(rid).stream().findAny().get();
+			Policy policy = policyService.findByRid(rid).stream().max(Comparator.comparing(Policy::getPcyDateB)).get();
+			resource = ResponseEntity.ok()
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=statement.docx")
+					.contentType(MediaType
+							.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+					.body(new InputStreamResource(wordService
+							.createDoc(attachOtherRegionsService.createEntity(user, formParams, gar, person, policy))));
+		} catch (Exception e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 

@@ -22,6 +22,7 @@ public class Gar {
 	private Long idlev2Rg;
 	private Long idlev3Rg;
 	private Long idlev4Rg;
+	@NotNull
 	private Long idlev5Rg;
 	private Long idlev1Pr;
 	private Long idlev2Pr;
@@ -34,7 +35,7 @@ public class Gar {
 	private String flev3Rg = "";
 	private String flev4Rg = "";
 	private String flev5Rg = "";
-	private String flev1Pr = "";
+	private String flev1Pr = "сар";
 	private String flev2Pr = "";
 	private String flev3Pr = "";
 	private String flev4Pr = "";

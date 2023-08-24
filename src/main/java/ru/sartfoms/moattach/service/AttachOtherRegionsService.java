@@ -33,13 +33,15 @@ public class AttachOtherRegionsService {
 		this.attachOtherRegionsDao = attachOtherRegionsDao;
 	}
 
-	public AttachOtherRegions attach(User user, AttachFormParameters formParams, Gar gar, Person person,
+	public AttachOtherRegions createEntity(User user, AttachFormParameters formParams, Gar gar, Person person,
 			Policy policy) {
 		AttachOtherRegions attachOtherRegions = new AttachOtherRegions();
 		attachOtherRegions.setUsr(user.getName());
 		attachOtherRegions.setDtIns(LocalDateTime.now());
-		attachOtherRegions.setEffDate(LocalDate.parse(formParams.getEffDate()));
+		LocalDate effDate = LocalDate.parse(formParams.getEffDate());
+		attachOtherRegions.setEffDate(effDate);
 		attachOtherRegions.setPeriod(formParams.getPeriod());
+		attachOtherRegions.setExpDate(effDate.plusDays(formParams.getPeriod()));
 		attachOtherRegions.setLastName(person.getLastName());
 		attachOtherRegions.setFirstName(person.getFirstName());
 		attachOtherRegions.setPatronymic(person.getPatronymic());
@@ -78,19 +80,33 @@ public class AttachOtherRegionsService {
 		attachOtherRegions.setDoctorsnils(formParams.getDoctorSnils());
 		attachOtherRegions.setGender(person.getGender());
 
-		return attachOtherRegionsRepository.save(attachOtherRegions);
+		return attachOtherRegions;
 	}
 
-	public AttachOtherRegions findByPcyNum(String pcyNum) {
-		return attachOtherRegionsRepository.findByPcyNum(pcyNum);
+	public AttachOtherRegions attach(User user, AttachFormParameters formParams, Gar gar, Person person,
+			Policy policy) {
+		AttachOtherRegions attachNew = createEntity(user, formParams, gar, person, policy);
+		AttachOtherRegions attachLast = getLastAttachByPcyNum(
+				policy.getEnp() != null ? policy.getEnp() : policy.getPcyNum());
+		LocalDate now = LocalDate.now();
+		if (attachLast != null && attachNew.getLpuId().intValue() == attachLast.getLpuId().intValue()
+				&& (attachLast.getContract().isAfter(now) || attachLast.getContract().equals(now))) {
+			attachNew.setContract(attachLast.getContract());
+		} else {
+			attachNew.setContract(now.plusYears(1));
+		}
+
+		return attachOtherRegionsRepository.save(attachNew);
+	}
+
+	public AttachOtherRegions getEffAttachByPcyNum(String pcyNum) {
+		return attachOtherRegionsRepository.findByPcyNumAndExpDateAfterOrderByEffDateDesc(pcyNum,
+				LocalDate.now().minusDays(1));
 	}
 
 	public boolean isAttachEffective(AttachOtherRegions attachOtherRegions) {
 		LocalDate now = LocalDate.now();
-		return (attachOtherRegions.getExpDate() != null && attachOtherRegions.getExpDate().isAfter(now)
-				&& attachOtherRegions.getEffDate().plusDays(attachOtherRegions.getPeriod()).isAfter(now))
-				|| (attachOtherRegions.getExpDate() == null
-						&& attachOtherRegions.getEffDate().plusDays(attachOtherRegions.getPeriod()).isAfter(now));
+		return attachOtherRegions.getExpDate() != null && attachOtherRegions.getExpDate().isAfter(now.minusDays(1));
 	}
 
 	public AttachOtherRegions getReferenceById(Optional<Long> attachId) {
@@ -104,7 +120,7 @@ public class AttachOtherRegionsService {
 	public Boolean isUnpinned(LocalDate expDate) {
 		LocalDate now = LocalDate.now();
 
-		return expDate != null && (expDate.isBefore(now) || expDate.isEqual(now));
+		return expDate != null && (expDate.isBefore(now));
 	}
 
 	public void save(AttachOtherRegions attachOtherRegions, AttachFormParameters formParams, Gar gar, String usr) {
@@ -149,7 +165,8 @@ public class AttachOtherRegionsService {
 		int currentPage = page.orElse(1);
 		PageRequest pageRequest = PageRequest.of(currentPage - 1, PAGE_SIZE);
 
-		return attachOtherRegionsRepository.findByLpuId(lpuId, pageRequest);
+		return attachOtherRegionsRepository.findByLpuIdAndExpDateAfterOrderByEffDateDesc(lpuId,
+				LocalDate.now().minusDays(1), pageRequest);
 	}
 
 	public void validate(AttachFormParameters formParams, BindingResult bindingResult) {
@@ -201,4 +218,9 @@ public class AttachOtherRegionsService {
 				formParams.getFirstName(), formParams.getPatronymic(), birthDay, formParams.getPolicyNum(),
 				pageRequest);
 	}
+
+	public AttachOtherRegions getLastAttachByPcyNum(String pcyNum) {
+		return attachOtherRegionsRepository.findFirstByPcyNumOrderByExpDate(pcyNum);
+	}
+
 }

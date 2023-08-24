@@ -1,5 +1,6 @@
 package ru.sartfoms.moattach.util;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
@@ -13,5 +14,9 @@ public class DateValidator {
 			return false;
 		}
 		return true;
+	}
+	public static boolean isAfterTnanNow(String dateStr) {
+		
+		return LocalDate.parse(dateStr).isAfter(LocalDate.now());
 	}
 }

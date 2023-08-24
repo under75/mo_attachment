@@ -32,7 +32,7 @@ public class AttachFormParameters {
 	@Size(max = 200)
 	private String dudlPredst;
 	@NotNull
-	private Integer period = 90;
+	private Integer period = 120;
 
 	public Integer getLpuId() {
 		return lpuId;

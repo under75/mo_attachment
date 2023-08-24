@@ -75,6 +75,8 @@ public class AttachOtherRegions {
 	private LocalDateTime dtIns;
 	@Column(name="gender")
 	private Integer gender;
+	@Column(name="contract")
+	private LocalDate contract;
 	
 	public Long getId() {
 		return id;
@@ -247,5 +249,10 @@ public class AttachOtherRegions {
 	public void setGender(Integer gender) {
 		this.gender = gender;
 	}
-	
+	public LocalDate getContract() {
+		return contract;
+	}
+	public void setContract(LocalDate contract) {
+		this.contract = contract;
+	}
 }
