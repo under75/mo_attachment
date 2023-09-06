@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 
 import ru.sartfoms.moattach.entity.PersonData;
 import ru.sartfoms.moattach.model.FerzlSearchParameters;
@@ -82,10 +83,16 @@ public class PersonDataService {
 	}
 
 	public void validate(FerzlSearchParameters searchParams, BindingResult bindingResult) {
-		if (!searchParams.getBirthDay().isEmpty()
-				&& !DateValidator.isValid(searchParams.getBirthDay())) {
+		if (!searchParams.getBirthDay().isEmpty() && !DateValidator.isValid(searchParams.getBirthDay())) {
 			bindingResult.rejectValue("birthDay", "");
 		}
+		if (searchParams.getPolicyNum().isEmpty()
+				&& (searchParams.getDudlNum().isEmpty() || searchParams.getDudlSer().isEmpty()
+						|| searchParams.getDudlType() == null || searchParams.getLastName().isEmpty()
+						|| searchParams.getFirstName().isEmpty() || searchParams.getBirthDay().isEmpty())) {
+			bindingResult.addError(new ObjectError("globalError","Для успешного поиска необходимо заполнить данные полиса либо данные ДУдЛ и ФИО-ДР"));
+		}
+
 	}
 
 	public PersonData getPersonDataByRid(Long rid) {

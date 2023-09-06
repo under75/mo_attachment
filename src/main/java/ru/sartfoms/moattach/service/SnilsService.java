@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.springframework.stereotype.Service;
 
 import ru.sartfoms.moattach.entity.Snils;
+import ru.sartfoms.moattach.model.ActualStatus;
 import ru.sartfoms.moattach.repository.SnilsRepository;
 
 @Service
@@ -16,6 +17,6 @@ public class SnilsService {
 	}
 
 	public Collection<Snils> findAllByRid(Long rid) {
-		return snilsRepository.findAllByRid(rid);
+		return snilsRepository.findAllByRidAndStatusIn(rid, new String[] {ActualStatus.ДНП.toString(), ActualStatus.ДПП.toString()});
 	}
 }

@@ -18,6 +18,6 @@ public class AttachService {
 
 	public Collection<Attach> findByRid(Long rid) {
 		return attachRepository.findByRidAndAttachStatusInAndAreaType(rid,
-				new String[] { ActualStatus.ДПП.toString(), ActualStatus.ДНП.toString() }, 1);
+				new String[] { ActualStatus.ДПП.toString(), ActualStatus.ДВП.toString() }, 1);
 	}
 }

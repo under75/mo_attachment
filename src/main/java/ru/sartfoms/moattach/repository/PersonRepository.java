@@ -11,4 +11,6 @@ public interface PersonRepository extends JpaRepository<Person, CompositeKey> {
 
 	Collection<Person> findAllByRid(Long rid);
 
+	Collection<Person> findByRidAndStatusIn(Long rid, String[] strings);
+
 }

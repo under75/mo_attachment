@@ -18,6 +18,11 @@ public class Gar {
 	private Collection<AsAddrObj> lev3Pr;
 	private Collection<AsAddrObj> lev4Pr;
 	private Collection<House> lev5Pr;
+	private Collection<AsAddrObj> lev1Mo;
+	private Collection<AsAddrObj> lev2Mo;
+	private Collection<AsAddrObj> lev3Mo;
+	private Collection<AsAddrObj> lev4Mo;
+	private Collection<House> lev5Mo;
 	private Long idlev1Rg;
 	private Long idlev2Rg;
 	private Long idlev3Rg;
@@ -30,6 +35,11 @@ public class Gar {
 	private Long idlev4Pr;
 	@NotNull
 	private Long idlev5Pr;
+	private Long idlev1Mo;
+	private Long idlev2Mo;
+	private Long idlev3Mo;
+	private Long idlev4Mo;
+	private Long idlev5Mo;
 	private String flev1Rg = "";
 	private String flev2Rg = "";
 	private String flev3Rg = "";
@@ -40,6 +50,11 @@ public class Gar {
 	private String flev3Pr = "";
 	private String flev4Pr = "";
 	private String flev5Pr = "";
+	private String flev1Mo = "";
+	private String flev2Mo = "";
+	private String flev3Mo = "";
+	private String flev4Mo = "";
+	private String flev5Mo = "";
 
 	public Collection<AsAddrObj> getLev1Rg() {
 		return lev1Rg;
@@ -280,4 +295,125 @@ public class Gar {
 	public void setIdlev5Pr(Long idlev5Pr) {
 		this.idlev5Pr = idlev5Pr;
 	}
+
+	public Collection<AsAddrObj> getLev1Mo() {
+		return lev1Mo;
+	}
+
+	public Collection<AsAddrObj> getLev2Mo() {
+		return lev2Mo;
+	}
+
+	public Collection<AsAddrObj> getLev3Mo() {
+		return lev3Mo;
+	}
+
+	public Collection<AsAddrObj> getLev4Mo() {
+		return lev4Mo;
+	}
+
+	public Collection<House> getLev5Mo() {
+		return lev5Mo;
+	}
+
+	public Long getIdlev1Mo() {
+		return idlev1Mo;
+	}
+
+	public Long getIdlev2Mo() {
+		return idlev2Mo;
+	}
+
+	public Long getIdlev3Mo() {
+		return idlev3Mo;
+	}
+
+	public Long getIdlev4Mo() {
+		return idlev4Mo;
+	}
+
+	public Long getIdlev5Mo() {
+		return idlev5Mo;
+	}
+
+	public String getFlev1Mo() {
+		return flev1Mo;
+	}
+
+	public String getFlev2Mo() {
+		return flev2Mo;
+	}
+
+	public String getFlev3Mo() {
+		return flev3Mo;
+	}
+
+	public String getFlev4Mo() {
+		return flev4Mo;
+	}
+
+	public String getFlev5Mo() {
+		return flev5Mo;
+	}
+
+	public void setLev1Mo(Collection<AsAddrObj> lev1Mo) {
+		this.lev1Mo = lev1Mo;
+	}
+
+	public void setLev2Mo(Collection<AsAddrObj> lev2Mo) {
+		this.lev2Mo = lev2Mo;
+	}
+
+	public void setLev3Mo(Collection<AsAddrObj> lev3Mo) {
+		this.lev3Mo = lev3Mo;
+	}
+
+	public void setLev4Mo(Collection<AsAddrObj> lev4Mo) {
+		this.lev4Mo = lev4Mo;
+	}
+
+	public void setLev5Mo(Collection<House> lev5Mo) {
+		this.lev5Mo = lev5Mo;
+	}
+
+	public void setIdlev1Mo(Long idlev1Mo) {
+		this.idlev1Mo = idlev1Mo;
+	}
+
+	public void setIdlev2Mo(Long idlev2Mo) {
+		this.idlev2Mo = idlev2Mo;
+	}
+
+	public void setIdlev3Mo(Long idlev3Mo) {
+		this.idlev3Mo = idlev3Mo;
+	}
+
+	public void setIdlev4Mo(Long idlev4Mo) {
+		this.idlev4Mo = idlev4Mo;
+	}
+
+	public void setIdlev5Mo(Long idlev5Mo) {
+		this.idlev5Mo = idlev5Mo;
+	}
+
+	public void setFlev1Mo(String flev1Mo) {
+		this.flev1Mo = flev1Mo;
+	}
+
+	public void setFlev2Mo(String flev2Mo) {
+		this.flev2Mo = flev2Mo;
+	}
+
+	public void setFlev3Mo(String flev3Mo) {
+		this.flev3Mo = flev3Mo;
+	}
+
+	public void setFlev4Mo(String flev4Mo) {
+		this.flev4Mo = flev4Mo;
+	}
+
+	public void setFlev5Mo(String flev5Mo) {
+		this.flev5Mo = flev5Mo;
+	}
+	
 }

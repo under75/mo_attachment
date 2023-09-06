@@ -26,11 +26,13 @@ public class AttachOtherRegionsService {
 	private static final Integer PAGE_SIZE = 10;
 	private final AttachOtherRegionsRepository attachOtherRegionsRepository;
 	private final AttachOtherRegionsDao attachOtherRegionsDao;
+	private final LpuService lpuService;
 
 	public AttachOtherRegionsService(AttachOtherRegionsRepository attachOtherRegionsRepository,
-			AttachOtherRegionsDao attachOtherRegionsDao) {
+			AttachOtherRegionsDao attachOtherRegionsDao, LpuService lpuService) {
 		this.attachOtherRegionsRepository = attachOtherRegionsRepository;
 		this.attachOtherRegionsDao = attachOtherRegionsDao;
+		this.lpuService = lpuService;
 	}
 
 	public AttachOtherRegions createEntity(User user, AttachFormParameters formParams, Gar gar, Person person,
@@ -58,22 +60,22 @@ public class AttachOtherRegionsService {
 		attachOtherRegions.setEmail(formParams.getEmail());
 		if (gar.getIdlev4Rg() != null)
 			attachOtherRegions.setAoguidreg(gar.getLev4Rg().stream()
-					.filter(t -> t.getId().longValue() == gar.getIdlev4Rg().longValue() && t.getIsActual()).findFirst()
+					.filter(t -> t.getId().longValue() == gar.getIdlev4Rg().longValue()).findFirst()
 					.get().getObjectguid());
 		if (gar.getIdlev5Rg() != null)
 			attachOtherRegions.setHsguidreg(gar.getLev5Rg().stream()
-					.filter(t -> t.getId().longValue() == gar.getIdlev5Rg().longValue() && t.getIsActual()).findFirst()
+					.filter(t -> t.getId().longValue() == gar.getIdlev5Rg().longValue()).findFirst()
 					.get().getObjectguid());
 		if (gar.getLev4Pr() != null)
 			attachOtherRegions.setAoguidpr(gar.getLev4Pr().stream()
-					.filter(t -> t.getId().longValue() == gar.getIdlev4Pr().longValue() && t.getIsActual()).findFirst()
+					.filter(t -> t.getId().longValue() == gar.getIdlev4Pr().longValue()).findFirst()
 					.get().getObjectguid());
 		else
 			attachOtherRegions.setAoguidpr(gar.getLev3Pr().stream()
-					.filter(t -> t.getId().longValue() == gar.getIdlev3Pr().longValue() && t.getIsActual()).findFirst()
+					.filter(t -> t.getId().longValue() == gar.getIdlev3Pr().longValue()).findFirst()
 					.get().getObjectguid());
 		attachOtherRegions.setHsguidpr(gar.getLev5Pr().stream()
-				.filter(t -> t.getId().longValue() == gar.getIdlev5Pr().longValue() && t.getIsActual()).findFirst()
+				.filter(t -> t.getId().longValue() == gar.getIdlev5Pr().longValue()).findFirst()
 				.get().getObjectguid());
 		attachOtherRegions.setLpuId(formParams.getLpuId());
 		attachOtherRegions.setLpuUnit(formParams.getLpuUnit());
@@ -84,7 +86,7 @@ public class AttachOtherRegionsService {
 	}
 
 	public AttachOtherRegions attach(User user, AttachFormParameters formParams, Gar gar, Person person,
-			Policy policy) {
+			Policy policy, byte[] worddoc) {
 		AttachOtherRegions attachNew = createEntity(user, formParams, gar, person, policy);
 		AttachOtherRegions attachLast = getLastAttachByPcyNum(
 				policy.getEnp() != null ? policy.getEnp() : policy.getPcyNum());
@@ -95,6 +97,7 @@ public class AttachOtherRegionsService {
 		} else {
 			attachNew.setContract(now.plusYears(1));
 		}
+		attachNew.setWorddoc(worddoc);
 
 		return attachOtherRegionsRepository.save(attachNew);
 	}
@@ -157,7 +160,8 @@ public class AttachOtherRegionsService {
 		LocalDate effDateMin = formParams.getEffDate().isEmpty() ? null : LocalDate.parse(formParams.getEffDate());
 		LocalDate effDateMax = formParams.getExpDate().isEmpty() ? null : LocalDate.parse(formParams.getExpDate());
 
-		return attachOtherRegionsDao.getDataPage(formParams.getLpuId(), formParams.getLpuUnit(),
+		return attachOtherRegionsDao.getDataPage(formParams.getHistorical(),
+				lpuService.getIdsForCriteriaBuilder(null, formParams.getLpuId()), formParams.getLpuUnit(),
 				formParams.getDoctorSnils(), effDateMin, effDateMax, pageRequest);
 	}
 
@@ -186,9 +190,11 @@ public class AttachOtherRegionsService {
 		}
 	}
 
-	public Collection<AttachOtherRegions> findByParams(Integer lpuId, String lpuUnit, String doctorSnils,
-			LocalDate effDateMin, LocalDate effDateMax) {
-		return attachOtherRegionsDao.findByParams(lpuId, lpuUnit, doctorSnils, effDateMin, effDateMax);
+	public Collection<AttachOtherRegions> findByParams(Boolean historical, Collection<Integer> lpuIds, String lpuUnit,
+			String doctorSnils, LocalDate effDateMin, LocalDate effDateMax, String lastName, String firstName,
+			String patronymic, LocalDate birthDay, String pcyNum) {
+		return attachOtherRegionsDao.toCollection(historical, lpuIds, lpuUnit, doctorSnils, effDateMin, effDateMax,
+				lastName, firstName, patronymic, birthDay, pcyNum);
 	}
 
 	public void validate(SearchFormParameters formParams, BindingResult bindingResult) {
@@ -213,8 +219,9 @@ public class AttachOtherRegionsService {
 		LocalDate effDateMax = formParams.getExpDate().isEmpty() ? null : LocalDate.parse(formParams.getExpDate());
 		LocalDate birthDay = formParams.getBirthDay().isEmpty() ? null : LocalDate.parse(formParams.getBirthDay());
 
-		return attachOtherRegionsDao.getDataPage(formParams.getMoId(), formParams.getLpuId(), formParams.getLpuUnit(),
-				formParams.getDoctorSnils(), effDateMin, effDateMax, formParams.getLastName(),
+		return attachOtherRegionsDao.getDataPage(formParams.getHistorical(),
+				lpuService.getIdsForCriteriaBuilder(formParams.getMoId(), formParams.getLpuId()),
+				formParams.getLpuUnit(), formParams.getDoctorSnils(), effDateMin, effDateMax, formParams.getLastName(),
 				formParams.getFirstName(), formParams.getPatronymic(), birthDay, formParams.getPolicyNum(),
 				pageRequest);
 	}

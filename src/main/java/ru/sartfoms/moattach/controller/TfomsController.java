@@ -1,12 +1,19 @@
 package ru.sartfoms.moattach.controller;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,11 +21,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import ru.sartfoms.moattach.entity.AttachOtherRegions;
 import ru.sartfoms.moattach.entity.Lpu;
+import ru.sartfoms.moattach.exception.ExcelGeneratorException;
 import ru.sartfoms.moattach.model.SearchFormParameters;
 import ru.sartfoms.moattach.service.AttachOtherRegionsService;
+import ru.sartfoms.moattach.service.ExcelService;
 import ru.sartfoms.moattach.service.LpuService;
 import ru.sartfoms.moattach.service.MedMzService;
 
@@ -27,12 +37,14 @@ public class TfomsController {
 	private final LpuService lpuService;
 	private final AttachOtherRegionsService attachOtherRegionsService;
 	private final MedMzService medMzService;
+	private final ExcelService excelService;
 
 	public TfomsController(LpuService lpuService, AttachOtherRegionsService attachOtherRegionsService,
-			MedMzService medMzService) {
+			MedMzService medMzService, ExcelService excelService) {
 		this.lpuService = lpuService;
 		this.attachOtherRegionsService = attachOtherRegionsService;
 		this.medMzService = medMzService;
+		this.excelService = excelService;
 	}
 
 	@GetMapping("/tfoms/attach/search")
@@ -60,19 +72,14 @@ public class TfomsController {
 			model.addAttribute("lpus", lpuService.findByParentId(formParams.getMoId()));
 		}
 
-		if (formParams.getLpuId() != null) {
-			model.addAttribute("lpuUnits",
-					attachOtherRegionsService.findByParams(formParams.getLpuId(), null, null, null, null).stream()
-							.map(t -> t.getLpuUnit()).distinct().collect(Collectors.toList()));
-			Integer parentId = lpuService.getById(formParams.getLpuId()).getParentId();
-			model.addAttribute("doctors", medMzService.findByLpuId(parentId != 0 ? parentId : formParams.getLpuId()));
-		} else if (formParams.getMoId() != null) {
-			model.addAttribute("lpuUnits",
-					attachOtherRegionsService.findByParams(formParams.getMoId(), null, null, null, null).stream()
-							.map(t -> t.getLpuUnit()).distinct().collect(Collectors.toList()));
-			Integer parentId = lpuService.getById(formParams.getMoId()).getParentId();
-			model.addAttribute("doctors", medMzService.findByLpuId(parentId != 0 ? parentId : formParams.getMoId()));
-		}
+		model.addAttribute("lpuUnits",
+				attachOtherRegionsService
+						.findByParams(formParams.getHistorical(),
+								lpuService.getIdsForCriteriaBuilder(formParams.getMoId(), formParams.getLpuId()), null,
+								null, null, null, null, null, null, null, null)
+						.stream().map(t -> t.getLpuUnit()).distinct().collect(Collectors.toList()));
+
+		model.addAttribute("doctors", medMzService.findByLpuId(formParams.getMoId()));
 
 		attachOtherRegionsService.validate(formParams, bindingResult);
 		Page<AttachOtherRegions> dataPage;
@@ -80,7 +87,7 @@ public class TfomsController {
 			dataPage = (Page<AttachOtherRegions>) session.getAttribute("dataPage");
 		} else {
 			if (excel.isPresent()) {
-				return "forward:/tfoms/attach/excel";
+				return "forward:/tfoms/attach/search/excel";
 			}
 			dataPage = attachOtherRegionsService.getDataPage(formParams, page);
 			session.setAttribute("dataPage", dataPage);
@@ -88,5 +95,41 @@ public class TfomsController {
 		model.addAttribute("dataPage", dataPage);
 
 		return "tfoms-attach-search";
+	}
+
+	@PostMapping("/tfoms/attach/search/excel")
+	@ResponseBody
+	public ResponseEntity<?> toExcel(Model model, @ModelAttribute("formParams") SearchFormParameters formParams,
+			@RequestParam("historical") Optional<?> historical) {
+		ResponseEntity<?> resource;
+		try {
+			resource = ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+ LocalDateTime.now().toString() +".xlsx")
+					.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+					.body(new InputStreamResource(excelService.createExcel(formParams)));
+		} catch (IOException | ExcelGeneratorException e) {
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return resource;
+	}
+
+	@GetMapping("/tfoms/attach/search/word")
+	@ResponseBody
+	public ResponseEntity<?> toWord(@RequestParam("attachId") Optional<Long> attachId) {
+		ResponseEntity<?> resource;
+		try {
+			AttachOtherRegions attachOtherRegions = attachOtherRegionsService.getReferenceById(attachId);
+			resource = ResponseEntity.ok()
+					.header(HttpHeaders.CONTENT_DISPOSITION,
+							"attachment; filename=" + attachOtherRegions.getPcyNum() + ".docx")
+					.contentType(MediaType
+							.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+					.body(attachOtherRegions.getWorddoc());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return resource;
 	}
 }

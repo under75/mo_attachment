@@ -58,6 +58,13 @@
 							id="birthDay" class="form-control form-control-sm" disabled />
 					</div>
 				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="snils">СНИЛС</label>
+						<input type="text" th:field="*{formParams.snils}" id="snils"
+							class="form-control form-control-sm" th:readonly="${formParams.snils != null}" />
+					</div>
+				</div>
 			</div>
 			<div class="row">
 				<div class="col-sm">
@@ -92,14 +99,118 @@
 					</div>
 				</div>
 			</div>
-			<div class="row" th:if="${attach != null && attach.lpu != null}">
-				<div class="col-sm-6">
+			<hr/>
+			<div class="row">
+				<div class="col-sm">
 					<div class="form-group">
-						<label class="col-form-label col-form-label-sm" for="lpuNotSar">Прикреплен
-							к медицинской организации / подразделению</label> <input type="text"
-							th:value="${attach.lpu.name}" id="lpuNotSar"
-							class="form-control form-control-sm" disabled />
+						<label class="col-form-label col-form-label-sm" for="moName">Прикреплен
+							к медицинской организации на момент подачи заявления (наименование)</label> <input 
+							th:field="*{formParams.moName}" id="moName" list="moNameOptions"
+							class="form-control form-control-sm" />
+						<datalist id="moNameOptions">
+							<option th:each="moName : ${moNames}" th:value="${moName}">
+						</datalist>
 					</div>
+				</div>
+			</div>
+			<br/>
+			<div class="row justify-content-center">
+				<div class="col-sm-6">
+					<table class="table table-sm">
+						<thead class="table-light">
+							<tr class="small">
+								<th class="w-75">Фактический адрес МО (выбор из ГАР)</th>
+								<th colspan="2" class="w-25">Фильтр</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev1Mo}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()"
+									th:classappend="${#fields.hasErrors('gar.idlev1Mo')} ? 'is-invalid' : ''"
+									title="Обязательно к заполнению">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev1Mo}"
+											th:value="${address.id}"
+											th:text="${address.name} +' ' + ${address.typename}"
+											th:selected="${gar.idlev1Mo}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev1Mo}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev2Mo}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()"
+									th:classappend="${#fields.hasErrors('gar.idlev2Mo')} ? 'is-invalid' : ''"
+									title="Обязательно к заполнению">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev2Mo}"
+											th:value="${address.id}"
+											th:text="${address.name}+' ' + ${address.typename}"
+											th:selected="${gar.idlev2Mo}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev2Mo}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev3Mo}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()"
+									th:classappend="${#fields.hasErrors('gar.idlev3Mo')} ? 'is-invalid' : ''"
+									title="Обязательно к заполнению">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev3Mo}"
+											th:value="${address.id}"
+											th:text="${address.name}+' ' + ${address.typename}"
+											th:selected="${gar.idlev3Mo}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev3Mo}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr th:if="${gar.lev4Mo != null}" class="small">
+								<td><select th:field="*{gar.idlev4Mo}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()"
+									th:classappend="${#fields.hasErrors('gar.idlev4Mo')} ? 'is-invalid' : ''"
+									title="Обязательно к заполнению">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev4Mo}"
+											th:value="${address.id}"
+											th:text="${address.name}+' ' + ${address.typename}"
+											th:selected="${gar.idlev4Mo}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev4Mo}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+							<tr class="small">
+								<td><select th:field="*{gar.idlev5Mo}"
+									class="form-select form-select-sm"
+									onchange="this.form.submit()"
+									th:classappend="${#fields.hasErrors('gar.idlev5Mo')} ? 'is-invalid' : ''"
+									title="Обязательно к заполнению">
+										<option value=""></option>
+										<option th:each="address : ${gar.lev5Mo}"
+											th:value="${address.id}"
+											th:text="${address.houseNum}+' ' + (${address.addNum1}?${address.addNum1}:'')+' ' + (${address.addNum2}?${address.addNum2}:'')"
+											th:selected="${gar.idlev5Mo}"></option>
+								</select></td>
+								<td><input type="text" th:field="*{gar.flev5Mo}"
+									class="form-control form-control-sm" /></td>
+								<td><input type="submit" value="Фильтр"
+									class="btn btn-sm btn-light" /></td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 			<hr />
@@ -436,7 +547,7 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-sm-5">
+				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="lpuSar">Прикрепить
 							к медицинской организации / подразделению</label> <select id="lpuSar"
@@ -458,7 +569,7 @@
 							title="Обязательно к заполнению" />
 					</div>
 				</div>
-				<div class="col-sm-3">
+				<div class="col-sm-4">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="doctorSnils">ФИО
 							врача</label> <select id="doctorSnils"
@@ -472,13 +583,32 @@
 						</select>
 					</div>
 				</div>
+			</div>
+			<div class="row">
 				<div class="col-sm">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="chiefDoc">«Кому» (Фамилия и инициалы руководителя в дательном падеже)</label> <input type="text"
+							th:field="*{formParams.chiefDoc}" id="chiefDoc"
+							th:classappend="${#fields.hasErrors('formParams.chiefDoc')} ? 'is-invalid' : ''"
+							class="form-control form-control-sm" title="Обязательно к заполнению" />
+					</div>
+				</div>
+				<div class="col-sm-2" th:classappend="${#fields.hasErrors('formParams.effDate')} ">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="effDate">Дата
 							прикрепления</label> <input type="date" th:field="*{formParams.effDate}"
-							th:max="${T(java.time.LocalDate).now().toString()}" id="effDate"
-							class="form-control form-control-sm"
+							th:max="${T(java.time.LocalDate).now().toString()}" id="effDate" th:min="${T(java.time.LocalDate).now().minusDays(30).toString()}"
+							class="form-control form-control-sm" title="Обязательно к заполнению"
 							th:classappend="${#fields.hasErrors('formParams.effDate')} ? 'is-invalid' : ''" />
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="col-form-label col-form-label-sm" for="regDate">Дата
+							регистр. заявл.</label> <input type="date" th:field="*{formParams.regDate}"
+							th:max="${T(java.time.LocalDate).now().toString()}" th:min="${T(java.time.LocalDate).now().minusDays(30).toString()}" id="regDate"
+							class="form-control form-control-sm" title="Обязательно к заполнению"
+							th:classappend="${#fields.hasErrors('formParams.regDate')} ? 'is-invalid' : ''" />
 					</div>
 				</div>
 				<div class="col-sm-1">
@@ -486,9 +616,7 @@
 						<label class="col-form-label col-form-label-sm" for="period">Срок,
 							дней</label> <input type="number" min="1" max="366"
 							th:field="*{formParams.period}" id="period"
-							class="form-control form-control-sm"
-							th:classappend="${#fields.hasErrors('formParams.period')} ? 'is-invalid' : ''"
-							readonly />
+							class="form-control form-control-sm" readonly />
 					</div>
 				</div>
 			</div>
@@ -498,9 +626,29 @@
 			<hr />
 			<div class="row">
 				<div class="col-sm">
-					<input type="submit" value="Прикрепить"
-						class="btn btn-sm btn-primary" name="save" />&nbsp;<input
-						type="submit" value="В Word" class="btn btn-sm btn-primary"
+					<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+					  Прикрепить
+					</button>
+					
+					<!-- Modal -->
+					<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+					  <div class="modal-dialog modal-dialog-centered">
+					    <div class="modal-content">
+					      <div class="modal-header">
+					        <h1 class="modal-title fs-5" id="staticBackdropLabel">Внимание!</h1>
+					        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					      </div>
+					      <div class="modal-body">
+					        После прикрепления вы не сможите выгрузить заявление в Microsoft Word. Продолжить прикрепление?
+					      </div>
+					      <div class="modal-footer">
+					        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Отмена</button>
+					        <input type="submit" value="Да" class="btn btn-sm btn-primary" name="save" />
+					      </div>
+					    </div>
+					  </div>
+					</div>
+					<input type="submit" value="В Word" class="btn btn-sm btn-secondary"
 						name="print"/>&nbsp;<button type="button" class="btn btn-sm btn-secondary"
 								onclick="location.href='/lpu/ferzl'">Вернуться к поиску в ФЕРЗЛ</button>
 				</div>

@@ -1,7 +1,5 @@
 package ru.sartfoms.moattach.model;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class FerzlSearchParameters {
@@ -9,25 +7,18 @@ public class FerzlSearchParameters {
 	@Size(max = 10)
 	private String policySer;
 	@Size(max = 16)
-	@NotEmpty
 	private String policyNum;
-	@NotNull
 	private Integer dudlType;
 	@Size(max = 12)
-	@NotEmpty
 	private String dudlSer;
 	@Size(max = 20)
-	@NotEmpty
 	private String dudlNum;
 	@Size(max = 40)
-	@NotEmpty
 	private String lastName;
 	@Size(max = 40)
-	@NotEmpty
 	private String firstName;
 	@Size(max = 40)
 	private String patronymic;
-	@NotEmpty
 	private String birthDay;
 	private String dateFrom;
 	private String dateTo;

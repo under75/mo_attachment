@@ -9,6 +9,6 @@ import ru.sartfoms.moattach.entity.Snils;
 
 public interface SnilsRepository extends JpaRepository<Snils, CompositeKey> {
 
-	Collection<Snils> findAllByRid(Long rid);
+	Collection<Snils> findAllByRidAndStatusIn(Long rid, String[] strings2);
 
 }

@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -77,6 +78,9 @@ public class AttachOtherRegions {
 	private Integer gender;
 	@Column(name="contract")
 	private LocalDate contract;
+	@Lob
+	@Column(name = "worddoc")
+	private byte[] worddoc;
 	
 	public Long getId() {
 		return id;
@@ -254,5 +258,11 @@ public class AttachOtherRegions {
 	}
 	public void setContract(LocalDate contract) {
 		this.contract = contract;
+	}
+	public byte[] getWorddoc() {
+		return worddoc;
+	}
+	public void setWorddoc(byte[] worddoc) {
+		this.worddoc = worddoc;
 	}
 }

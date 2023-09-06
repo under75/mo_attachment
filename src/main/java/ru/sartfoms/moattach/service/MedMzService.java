@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.springframework.stereotype.Service;
 
 import ru.sartfoms.moattach.entity.MedMz;
+import ru.sartfoms.moattach.entity.MedMzPk;
 import ru.sartfoms.moattach.repository.MedMzRepository;
 
 @Service
@@ -18,4 +19,13 @@ public class MedMzService {
 	public Collection<MedMz> findByLpuId(Integer lpuId) {
 		return medMzRepository.findByLpuIdOrderByLastName(lpuId);
 	}
+
+	public MedMz getById(MedMzPk medMzPk) {
+		return medMzRepository.getReferenceById(medMzPk);
+	}
+
+	public  Collection<MedMz> findBySnils(String doctorsnils) {
+		return medMzRepository.findBySnils(doctorsnils);
+	}
+
 }

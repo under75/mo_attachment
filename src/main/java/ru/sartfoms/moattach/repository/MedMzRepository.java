@@ -11,4 +11,6 @@ public interface MedMzRepository extends JpaRepository<MedMz, MedMzPk> {
 
 	Collection<MedMz> findByLpuIdOrderByLastName(Integer lpuId);
 
+	Collection<MedMz> findBySnils(String doctorsnils);
+
 }

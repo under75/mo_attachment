@@ -33,6 +33,13 @@ public class AttachFormParameters {
 	private String dudlPredst;
 	@NotNull
 	private Integer period = 120;
+	private String moName;
+	@NotEmpty
+	private String chiefDoc;
+	private Boolean historical = false;
+	@NotEmpty
+	private String regDate;
+	private String snils;
 
 	public Integer getLpuId() {
 		return lpuId;
@@ -137,4 +144,48 @@ public class AttachFormParameters {
 	public void setPeriod(Integer period) {
 		this.period = period;
 	}
+
+	public String getMoName() {
+		return moName;
+	}
+
+	public void setMoName(String moName) {
+		if (moName != null)
+			this.moName = moName.trim();
+	}
+
+	public String getChiefDoc() {
+		return chiefDoc;
+	}
+
+	public void setChiefDoc(String chiefDoc) {
+		if (chiefDoc != null)
+			this.chiefDoc = chiefDoc.trim();
+	}
+
+	public Boolean getHistorical() {
+		return historical;
+	}
+
+	public void setHistorical(Boolean historical) {
+		this.historical = historical;
+	}
+
+	public String getRegDate() {
+		return regDate;
+	}
+
+	public void setRegDate(String regDate) {
+		this.regDate = regDate;
+	}
+
+	public String getSnils() {
+		return snils;
+	}
+
+	public void setSnils(String snils) {
+		if (snils != null)
+			this.snils = snils.trim();
+	}
+
 }

@@ -19,8 +19,8 @@
 				aria-current="page" href="#">Поиск персоны в ФЕРЗЛ</a></li>
 			<li class="nav-item"><a class="nav-link disabled" href="#">Ввод
 					информации о прикреплении</a></li>
-			<li class="nav-item"><a class="nav-link" href="/lpu/attach/search">Поиск прикрепленной
-					персоны</a></li>
+			<li class="nav-item"><a class="nav-link"
+				href="/lpu/attach/search">Поиск прикрепленной персоны</a></li>
 			<li class="nav-item"><a class="nav-link disabled" href="#">Редактирование
 					информации о прикреплении</a></li>
 		</ul>
@@ -54,11 +54,11 @@
 				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="policyNum">Номер
-							полиса / ЕНП *</label> <input type="text"
+							полиса / ЕНП </label> <input type="text"
 							th:field="*{searchParams.policyNum}" id="policyNum"
 							class="form-control form-control-sm"
 							th:classappend="${#fields.hasErrors('searchParams.policyNum')} ? 'is-invalid' : ''"
-							placeholder="номер" title="Обязательно к заполнению" />
+							placeholder="номер" />
 					</div>
 				</div>
 			</div>
@@ -66,10 +66,9 @@
 				<div class="col-sm-6">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="dudlType">Тип
-							ДУдЛ *</label> <select id="dudlType" th:field="*{searchParams.dudlType}"
+							ДУдЛ </label> <select id="dudlType" th:field="*{searchParams.dudlType}"
 							class="form-select form-select-sm"
-							th:classappend="${#fields.hasErrors('searchParams.dudlType')} ? 'is-invalid' : ''"
-							title="Обязательно к заполнению">
+							th:classappend="${#fields.hasErrors('searchParams.dudlType')} ? 'is-invalid' : ''">
 							<option value=""></option>
 							<option th:each="dudlType : ${dudlTypes}"
 								th:value="${dudlType.docCode}" th:text="${dudlType.docName}"
@@ -80,19 +79,19 @@
 				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="dudlSer">Серия
-							ДУдЛ *</label> <input type="text" th:field="*{searchParams.dudlSer}"
+							ДУдЛ </label> <input type="text" th:field="*{searchParams.dudlSer}"
 							id="dudlSer" class="form-control form-control-sm"
 							th:classappend="${#fields.hasErrors('searchParams.dudlSer')} ? 'is-invalid' : ''"
-							placeholder="серия" title="Обязательно к заполнению" />
+							placeholder="серия" />
 					</div>
 				</div>
 				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="dudlNum">Номер
-							ДУдЛ *</label> <input type="text" th:field="*{searchParams.dudlNum}"
+							ДУдЛ </label> <input type="text" th:field="*{searchParams.dudlNum}"
 							id="dudlNum" class="form-control form-control-sm"
 							th:classappend="${#fields.hasErrors('searchParams.dudlNum')} ? 'is-invalid' : ''"
-							placeholder="номер" title="Обязательно к заполнению" />
+							placeholder="номер" />
 					</div>
 				</div>
 			</div>
@@ -100,19 +99,19 @@
 				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="lastName">Фамилия
-							*</label> <input type="text" th:field="*{searchParams.lastName}"
+						</label> <input type="text" th:field="*{searchParams.lastName}"
 							id="lastName" class="form-control form-control-sm"
 							th:classappend="${#fields.hasErrors('searchParams.lastName')} ? 'is-invalid' : ''"
-							placeholder="фамилия" title="Обязательно к заполнению" />
+							placeholder="фамилия" />
 					</div>
 				</div>
 				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="firstName">Имя
-							*</label> <input type="text" th:field="*{searchParams.firstName}"
+						</label> <input type="text" th:field="*{searchParams.firstName}"
 							id="firstName" class="form-control form-control-sm"
 							th:classappend="${#fields.hasErrors('searchParams.firstName')} ? 'is-invalid' : ''"
-							placeholder="имя" title="Обязательно к заполнению" />
+							placeholder="имя" />
 					</div>
 				</div>
 				<div class="col-sm">
@@ -127,10 +126,9 @@
 				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="birthDay">Дата
-							рождения *</label><input type="date" th:field="*{searchParams.birthDay}"
+							рождения </label><input type="date" th:field="*{searchParams.birthDay}"
 							id="birthDay" class="form-control form-control-sm"
-							th:classappend="${#fields.hasErrors('searchParams.birthDay')} ? 'is-invalid' : ''"
-							title="Обязательно к заполнению" />
+							th:classappend="${#fields.hasErrors('searchParams.birthDay')} ? 'is-invalid' : ''" />
 					</div>
 				</div>
 			</div>
@@ -144,6 +142,13 @@
 						value="Обновить" th:onclick="|goToPage(${dataPage.number + 1})|"
 						class="btn btn-sm btn-secondary" /><input type="hidden" id="page"
 						name="page" />
+					<div class="badge text-bg-danger"
+						th:if="${#fields.hasErrors('searchParams')}"
+						th:errors="*{searchParams}"></div>
+					<div class="badge text-bg-info"
+						th:if="${dataPage.getContent().get(0).hasError == null}">Запрос
+						в ФЕРЗЛ отправлен. Дождитесь начала новой минуты, затем нажмите
+						кнопку "Обновить"</div>
 				</div>
 			</div>
 			<hr />
@@ -166,7 +171,8 @@
 							th:attr="data-rid=${persData.rid}, data-done=${persData.hasError != null}"
 							class='clickable-row small' style="cursor: pointer;"
 							onclick="goToResult(this.getAttribute('data-rid'), this.getAttribute('data-done'))"
-							th:classappend="|${persData.hasError != null && !persData.hasError ? 'table-success' : ''} ${persData.hasError != null && persData.hasError ? 'table-danger' : ''}|" th:title="${persData.hasError != null && !persData.hasError ? 'Кликните для прикрепления' : 'Ошибка поиска'}">
+							th:classappend="|${persData.hasError != null && !persData.hasError ? 'table-success' : ''} ${persData.hasError != null && persData.hasError ? 'table-danger' : ''}|"
+							th:title="${persData.hasError != null && !persData.hasError ? 'Кликните для прикрепления' : 'Ошибка поиска'}">
 							<td
 								th:text="${#temporals.format(persData.dtIns, 'dd.MM.yyyy HH:mm:ss')}" />
 							<td th:text="${persData.pcy}" />

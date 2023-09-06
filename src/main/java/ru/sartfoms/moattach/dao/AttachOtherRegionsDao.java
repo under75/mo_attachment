@@ -28,31 +28,15 @@ public class AttachOtherRegionsDao {
 		this.entityManager = entityManager;
 	}
 
-	public Page<AttachOtherRegions> getDataPage(Integer lpuId, String lpuUnit, String doctorSnils, LocalDate effDateMin,
-			LocalDate effDateMax, PageRequest page) {
+	public Page<AttachOtherRegions> getDataPage(Boolean historical, Collection<Integer> lpuIds, String lpuUnit,
+			String doctorSnils, LocalDate effDateMin, LocalDate effDateMax, PageRequest page) {
 
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<AttachOtherRegions> criteriaQuery = criteriaBuilder.createQuery(AttachOtherRegions.class);
 		Root<AttachOtherRegions> root = criteriaQuery.from(AttachOtherRegions.class);
 
-		Collection<Predicate> predicates = new ArrayList<Predicate>();
-		predicates.add(criteriaBuilder.equal(root.get("lpuId"), lpuId));
-		predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("expDate"), LocalDate.now()));
-		if (lpuUnit != null && !lpuUnit.isEmpty()) {
-			predicates.add(criteriaBuilder.equal(criteriaBuilder.upper(root.get("lpuUnit")), lpuUnit.toUpperCase()));
-		}
-		if (doctorSnils != null && !doctorSnils.isEmpty()) {
-			predicates.add(criteriaBuilder.equal(root.get("doctorsnils"), doctorSnils));
-		}
-		if (effDateMin != null && effDateMax != null) {
-			predicates.add(criteriaBuilder.between(root.get("effDate"), effDateMin, effDateMax));
-		} else if (effDateMin != null) {
-			predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("effDate"), effDateMin));
-		} else if (effDateMax != null) {
-			predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("effDate"), effDateMax));
-		}
-
-		criteriaQuery.select(root).where(predicates.toArray(new Predicate[] {}));
+		criteriaQuery.select(root).where(getPredicates(criteriaBuilder, root, historical, lpuIds, lpuUnit, doctorSnils,
+				effDateMin, effDateMax, null, null, null, null, null).toArray(new Predicate[] {}));
 		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("effDate")));
 
 		TypedQuery<AttachOtherRegions> query = entityManager.createQuery(criteriaQuery);
@@ -63,52 +47,54 @@ public class AttachOtherRegionsDao {
 		return new PageImpl<AttachOtherRegions>(query.getResultList(), page, totalRows);
 	}
 
-	public Collection<AttachOtherRegions> findByParams(Integer lpuId, String lpuUnit, String doctorSnils,
-			LocalDate effDateMin, LocalDate effDateMax) {
+	public Page<AttachOtherRegions> getDataPage(Boolean historical, Collection<Integer> lpuIds, String lpuUnit,
+			String doctorSnils, LocalDate effDateMin, LocalDate effDateMax, String lastName, String firstName,
+			String patronymic, LocalDate birthDay, String policyNum, PageRequest page) {
+
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<AttachOtherRegions> criteriaQuery = criteriaBuilder.createQuery(AttachOtherRegions.class);
 		Root<AttachOtherRegions> root = criteriaQuery.from(AttachOtherRegions.class);
 
-		Collection<Predicate> predicates = new ArrayList<Predicate>();
-		predicates.add(criteriaBuilder.equal(root.get("lpuId"), lpuId));
-		predicates.add(criteriaBuilder.or(criteriaBuilder.isNull(root.get("expDate")),
-				criteriaBuilder.greaterThan(root.get("expDate"), LocalDate.now())));
-		if (lpuUnit != null && !lpuUnit.isEmpty()) {
-			predicates.add(criteriaBuilder.equal(root.get("lpuUnit"), lpuUnit));
-		}
-		if (doctorSnils != null && !doctorSnils.isEmpty()) {
-			predicates.add(criteriaBuilder.equal(root.get("doctorsnils"), doctorSnils));
-		}
-		if (effDateMin != null && effDateMax != null) {
-			predicates.add(criteriaBuilder.between(root.get("effDate"), effDateMin, effDateMax));
-		} else if (effDateMin != null) {
-			predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("effDate"), effDateMin));
-		} else if (effDateMax != null) {
-			predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("effDate"), effDateMax));
-		}
+		criteriaQuery.select(root)
+				.where(getPredicates(criteriaBuilder, root, historical, lpuIds, lpuUnit, doctorSnils, effDateMin,
+						effDateMax, lastName, firstName, patronymic, birthDay, policyNum).toArray(new Predicate[] {}));
+		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("effDate")));
 
-		criteriaQuery.select(root).where(predicates.toArray(new Predicate[] {}));
+		TypedQuery<AttachOtherRegions> query = entityManager.createQuery(criteriaQuery);
+		int totalRows = query.getResultList().size();
+		query.setFirstResult(page.getPageNumber() * page.getPageSize());
+		query.setMaxResults(page.getPageSize());
+
+		return new PageImpl<AttachOtherRegions>(query.getResultList(), page, totalRows);
+	}
+
+	public Collection<AttachOtherRegions> toCollection(Boolean historical, Collection<Integer> lpuIds, String lpuUnit,
+			String doctorSnils, LocalDate effDateMin, LocalDate effDateMax, String lastName, String firstName,
+			String patronymic, LocalDate birthday, String policyNum) {
+
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<AttachOtherRegions> criteriaQuery = criteriaBuilder.createQuery(AttachOtherRegions.class);
+		Root<AttachOtherRegions> root = criteriaQuery.from(AttachOtherRegions.class);
+
+		criteriaQuery.select(root)
+				.where(getPredicates(criteriaBuilder, root, historical, lpuIds, lpuUnit, doctorSnils, effDateMin,
+						effDateMax, lastName, firstName, patronymic, birthday, policyNum).toArray(new Predicate[] {}));
 		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("effDate")));
 
 		return entityManager.createQuery(criteriaQuery).getResultList();
 	}
 
-	public Page<AttachOtherRegions> getDataPage(Integer moId, Integer lpuId, String lpuUnit, String doctorSnils,
-			LocalDate effDateMin, LocalDate effDateMax, String lastName, String firstName, String patronymic,
-			LocalDate birthDay, String policyNum, PageRequest page) {
-
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<AttachOtherRegions> criteriaQuery = criteriaBuilder.createQuery(AttachOtherRegions.class);
-		Root<AttachOtherRegions> root = criteriaQuery.from(AttachOtherRegions.class);
-
+	private Collection<Predicate> getPredicates(CriteriaBuilder criteriaBuilder, Root<AttachOtherRegions> root,
+			Boolean historical, Collection<Integer> lpuIds, String lpuUnit, String doctorSnils, LocalDate effDateMin,
+			LocalDate effDateMax, String lastName, String firstName, String patronymic, LocalDate birthDay,
+			String policyNum) {
 		Collection<Predicate> predicates = new ArrayList<Predicate>();
-		if (lpuId != null) {
-			predicates.add(criteriaBuilder.equal(root.get("lpuId"), lpuId));
-		} else if (moId != null) {
-			predicates.add(criteriaBuilder.equal(root.get("lpuId"), moId));
+		if (!historical) {
+			predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("expDate"), LocalDate.now()));
 		}
-		predicates.add(criteriaBuilder.or(criteriaBuilder.isNull(root.get("expDate")),
-				criteriaBuilder.greaterThan(root.get("expDate"), LocalDate.now())));
+		if (lpuIds.size() > 0) {
+			predicates.add(root.get("lpuId").in(lpuIds));
+		}
 		if (lpuUnit != null && !lpuUnit.isEmpty()) {
 			predicates.add(criteriaBuilder.equal(criteriaBuilder.upper(root.get("lpuUnit")), lpuUnit.toUpperCase()));
 		}
@@ -139,14 +125,6 @@ public class AttachOtherRegionsDao {
 			predicates.add(criteriaBuilder.like(root.get("pcyNum"), policyNum));
 		}
 
-		criteriaQuery.select(root).where(predicates.toArray(new Predicate[] {}));
-		criteriaQuery.orderBy(criteriaBuilder.desc(root.get("effDate")));
-
-		TypedQuery<AttachOtherRegions> query = entityManager.createQuery(criteriaQuery);
-		int totalRows = query.getResultList().size();
-		query.setFirstResult(page.getPageNumber() * page.getPageSize());
-		query.setMaxResults(page.getPageSize());
-
-		return new PageImpl<AttachOtherRegions>(query.getResultList(), page, totalRows);
+		return predicates;
 	}
 }

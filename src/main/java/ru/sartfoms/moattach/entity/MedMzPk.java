@@ -8,6 +8,14 @@ public class MedMzPk implements Serializable {
 	private Integer lpuId;
 
 	private String snils;
+	
+	public MedMzPk() {
+	}
+
+	public MedMzPk(Integer id, String doctorSnils) {
+		lpuId = id;
+		snils = doctorSnils;
+	}
 
 	public Integer getLpuId() {
 		return lpuId;

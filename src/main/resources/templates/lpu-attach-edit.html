@@ -113,7 +113,7 @@
 				<div class="form-group">
 					<label class="col-form-label col-form-label-sm" for="dudlPredst">Документ,
 						подтверждающий право законного предстовителя</label>
-					<textarea th:value="${attachOtherRegions.predstDoc}"
+					<textarea th:text="${attachOtherRegions.predstDoc}"
 						id="dudlPredst" class="form-control form-control-sm" disabled></textarea>
 				</div>
 			</div>
@@ -418,6 +418,7 @@
 							name="unpin">Открепить с</button>
 						<input type="date" class="form-control form-control-sm"
 							th:max="${attachOtherRegions.effDate.plusDays(attachOtherRegions.period).toString()}"
+							th:min="${attachOtherRegions.effDate.toString()}"
 							th:classappend="${#fields.hasErrors('formParams.expDate')} ? 'is-invalid' : ''"
 							aria-describedby="unpinBtn" th:field="${formParams.expDate}" />
 					</div>

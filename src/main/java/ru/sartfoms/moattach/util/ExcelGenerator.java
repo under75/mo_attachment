@@ -20,7 +20,7 @@ public abstract class ExcelGenerator {
 	protected DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 	protected Collection<?> rows;
 	protected Object[] columns;
-
+	
 	public ExcelGenerator(Collection<?> rows) throws ExcelGeneratorException {
 		if (rows.size() > 65535)
 			throw new ExcelGeneratorException("Превышено допустимое количество строк для Excel, 65535 максимум");

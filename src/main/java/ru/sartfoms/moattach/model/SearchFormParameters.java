@@ -21,6 +21,7 @@ public class SearchFormParameters {
 	private String birthDay;
 	@Size(max = 16)
 	private String policyNum;
+	private Boolean historical = false;
 
 	public Integer getMoId() {
 		return moId;
@@ -117,6 +118,14 @@ public class SearchFormParameters {
 	public void setExpDate(String expDate) {
 		if (expDate != null)
 			this.expDate = expDate.trim();
+	}
+
+	public Boolean getHistorical() {
+		return historical;
+	}
+
+	public void setHistorical(Boolean historical) {
+		this.historical = historical;
 	}
 
 }

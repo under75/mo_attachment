@@ -68,7 +68,7 @@
 							прикрепления с</label><input type="date" id="effDate"
 							class="form-control form-control-sm"
 							th:classappend="${#fields.hasErrors('formParams.effDate')} ? 'is-invalid' : ''"
-							th:field="${formParams.effDate}" />
+							th:field="*{formParams.effDate}" />
 					</div>
 				</div>
 				<div class="col-sm-2">
@@ -77,18 +77,27 @@
 						<input type="date" id="expDate"
 							class="form-control form-control-sm"
 							th:classappend="${#fields.hasErrors('formParams.expDate')} ? 'is-invalid' : ''"
-							th:field="${formParams.expDate}" />
+							th:field="*{formParams.expDate}" />
 					</div>
 				</div>
 			</div>
 			<hr />
-			<div class="row">
+			<div class="row justify-content-between">
 				<div class="col-sm">
 					<input type="submit" value="Поиск" class="btn btn-sm btn-primary"
 						name="search" />&nbsp;<input type="button" value="Очистить"
 						onclick="location.href='/lpu/attach/search'"
-						class="btn btn-sm btn-secondary" />&nbsp; <input type="submit"
+						class="btn btn-sm btn-secondary" />&nbsp;<input type="submit"
 						value="В Excel" class="btn btn-sm btn-primary" name="excel" />
+				</div>
+				<div class="col-sm-2 align-self-center">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" role="switch"
+							th:field="*{formParams.historical}"
+							th:checked="${formParams.historical}" id="historical"> <label
+							class="form-check-label" for="historical">искать в
+							истории</label>
+					</div>
 				</div>
 			</div>
 			<div th:if="${dataPage != null && dataPage.content.size  > 0}">
@@ -101,22 +110,25 @@
 							<th>ФИО</th>
 							<th>Дата рождения</th>
 							<th>Номер полиса</th>
-							<th></th>
+							<th>Контракт до</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr th:each="persData, iStat : ${dataPage.content}"
-							th:attr="data-id=${persData.id}" class='clickable-row small'>
+							th:onclick="|goToResult(${persData.id})|"
+							title="Кликните для редактирования" class='clickable-row small'
+							style="cursor: pointer;">
 							<td
 								th:text="${#temporals.format(persData.effDate, 'dd.MM.yyyy')}" />
 							<td
-								th:text="${persData.expDate != null ? #temporals.format(persData.expDate, 'dd.MM.yyyy') : #temporals.format(persData.effDate.plusDays(persData.period), 'dd.MM.yyyy')}" />
+								th:text="${#temporals.format(persData.expDate, 'dd.MM.yyyy')}" />
 							<td
 								th:text="${persData.lastName + ' ' + persData.firstName + ' ' + persData.patronymic}" />
 							<td
 								th:text="${#temporals.format(persData.birthDay, 'dd.MM.yyyy')}" />
 							<td th:text="${persData.pcyNum}" />
-							<td><a href="#" th:onclick="|goToResult(${persData.id})|">Редактировать</a></td>
+							<td
+								th:text="${#temporals.format(persData.contract, 'dd.MM.yyyy')}" />
 						</tr>
 					</tbody>
 				</table>

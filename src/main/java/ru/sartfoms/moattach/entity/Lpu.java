@@ -18,6 +18,9 @@ public class Lpu implements Serializable {
 	@Column(name = "NM_LPU")
 	private String name;
 	
+	@Column(name="M_NAMEF")
+	private String fullName;
+	
 	@Column(name = "mcod")
 	private String moСode;
 	
@@ -29,6 +32,12 @@ public class Lpu implements Serializable {
 	
 	@Column(name = "FLAG_A")
 	private Integer flagA;
+	
+	@Column(name = "fiogv")
+	private String chiefDoctor;
+	
+	@Column(name = "adr")
+	private String address;
 	
 	public Integer getId() {
 		return id;
@@ -66,4 +75,23 @@ public class Lpu implements Serializable {
 	public void setFlagA(Integer flagA) {
 		this.flagA = flagA;
 	}
+	public String getChiefDoctor() {
+		return chiefDoctor;
+	}
+	public void setChiefDoctor(String chiefDoctor) {
+		this.chiefDoctor = chiefDoctor;
+	}
+	public String getFullName() {
+		return fullName;
+	}
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	
 }

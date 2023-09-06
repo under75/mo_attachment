@@ -7,6 +7,7 @@ import java.util.Collection;
 import org.springframework.stereotype.Service;
 
 import ru.sartfoms.moattach.entity.Person;
+import ru.sartfoms.moattach.model.ActualStatus;
 import ru.sartfoms.moattach.repository.PersonRepository;
 
 @Service
@@ -18,12 +19,13 @@ public class PersonService {
 		this.personRepository = personRepository;
 	}
 
-	public Collection<Person> findAllByRid(Long rid) {
-		return personRepository.findAllByRid(rid);
-	}
-
 	public int getAge(Person person) {
 		return Period.between(person.getBirthDay(), LocalDate.now()).getYears();
+	}
+
+	public Collection<Person> findByRid(Long rid) {
+		return personRepository.findByRidAndStatusIn(rid,
+				new String[] { ActualStatus.ДНП.toString(), ActualStatus.ДПП.toString() });
 	}
 
 }
