@@ -49,7 +49,7 @@ public class AddressService {
 
 	public Collection<Address> findAllByRidAndAddressType(Long rid, String addrType) {
 		return addressRepository.findAllByRidAndAddressTypeAndStatusIn(rid, addrType,
-				new String[] { ActualStatus.ДНП.toString(), ActualStatus.ДПП.toString() });
+				new String[] { ActualStatus.ДПП.toString() });
 	}
 
 	public void initGarRgFromFerzl(Gar gar, Collection<Address> rgAddresses, Integer nrRgaddr) {
@@ -69,7 +69,8 @@ public class AddressService {
 					path = admHierarchyRepository
 							.findByObjectidAndEndDateAfter(addrObj.getObjectid(), LocalDate.now().toString()).getPath();
 			}
-			initGarRg(gar, path);
+			if (!path.isEmpty())
+				initGarRg(gar, path);
 		}
 		gar.setLev1Rg(findLevel1());
 		gar.setLev1Pr(findLevel1());

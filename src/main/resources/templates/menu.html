@@ -2,13 +2,18 @@
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <body>
-	<nav class="navbar bg-primary" data-bs-theme="dark" th:fragment="navbar">
+	<nav class="navbar bg-primary" data-bs-theme="dark"
+		th:fragment="navbar">
 		<div class="container-fluid">
-			<span class="navbar-brand mb-0 h1">Учетное прикрепление к МО лиц, застрахованных по ОМС за пределами Саратовской области
-			</span>
-			<form th:action="@{/logout}" method="post">
-				<button type="submit" class="btn btn-outline-light" >Выход</button>
-			</form>
+			<span class="navbar-brand mb-0 h1">Учетное прикрепление к МО
+				лиц, застрахованных по ОМС за пределами Саратовской области </span>
+			<div class="d-flex flex-nowrap">
+				<a href="/help" target="_blank" sec:authorize="hasAuthority('lpu')"
+					class="btn btn-outline-light">Справка</a>&nbsp;
+				<form th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-outline-light">Выход</button>
+				</form>
+			</div>
 		</div>
 	</nav>
 </body>

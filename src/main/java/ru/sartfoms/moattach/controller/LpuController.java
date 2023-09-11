@@ -1,6 +1,7 @@
 package ru.sartfoms.moattach.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,8 +15,10 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -528,5 +531,21 @@ public class LpuController {
 		}
 
 		return resource;
+	}
+	
+	@GetMapping(value = "/help", produces = { "application/octet-stream" })
+	public ResponseEntity<?> help() {
+		try {
+			ClassPathResource resource = new ClassPathResource("files/manual.pdf", this.getClass().getClassLoader());
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentLength(resource.contentLength());
+			headers.setContentType(MediaType.parseMediaType(("application/pdf")));
+			headers.setContentDisposition(ContentDisposition.inline().filename("SPRAVKA").build());
+
+			return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 }

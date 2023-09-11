@@ -4,8 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
-<title
-	th:text="${@environment.getProperty('app.name')} + ' - Учетное прикрепление застрахованных на других территориях'"></title>
+<title>Учетное прикрепление застрахованных на других территориях</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
 	th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
@@ -104,7 +103,7 @@
 				<div class="col-sm">
 					<div class="form-group">
 						<label class="col-form-label col-form-label-sm" for="moName">Прикреплен
-							к медицинской организации на момент подачи заявления (наименование)</label> <input 
+							к медицинской организации на момент подачи заявления (наименование)<span class="badge text-bg-info">при наличии</span></label> <input 
 							th:field="*{formParams.moName}" id="moName" list="moNameOptions"
 							class="form-control form-control-sm" />
 						<datalist id="moNameOptions">
@@ -241,7 +240,7 @@
 					<div class="row">
 						<div class="col-sm">
 							<div class="form-group">
-								<label class="col-form-label col-form-label-sm" for="phone">Телефон</label><input
+								<label class="col-form-label col-form-label-sm" for="phone">Телефон<span class="badge text-bg-info">при наличии</span></label><input
 									type="text" class="form-control form-control-sm"
 									th:field="*{formParams.phone}"
 									th:classappend="${#fields.hasErrors('formParams.phone')} ? 'is-invalid' : ''" />
@@ -249,7 +248,7 @@
 						</div>
 						<div class="col-sm">
 							<div class="form-group">
-								<label class="col-form-label col-form-label-sm" for="email">Email</label><input
+								<label class="col-form-label col-form-label-sm" for="email">Email<span class="badge text-bg-info">при наличии</span></label><input
 									type="text" class="form-control form-control-sm"
 									th:field="*{formParams.email}"
 									th:classappend="${#fields.hasErrors('formParams.email')} ? 'is-invalid' : ''" />
