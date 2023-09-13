@@ -84,7 +84,15 @@ public class AddressService {
 
 			} else if (asAddrObj.getLevel() == 1) {
 				gar.setIdlev1Rg(asAddrObj.getId());
-				gar.setLev2Rg(findLevelByParent(asAddrObj.getObjectid()));
+				if (asAddrObj.getTypename().equals("г")) {
+					gar.setIdlev2Rg(gar.getIdlev1Rg());
+					gar.setLev3Rg(findLevelByParent(asAddrObj.getObjectid()));
+					Collection<AsAddrObj> lev2Rg = new ArrayList<>();
+					lev2Rg.add(asAddrObj);
+					gar.setLev2Rg(lev2Rg);
+				} else {
+					gar.setLev2Rg(findLevelByParent(asAddrObj.getObjectid()));
+				}
 			} else if (asAddrObj.getLevel() > 1 && asAddrObj.getLevel() < 6) {
 				gar.setIdlev2Rg(asAddrObj.getId());
 				gar.setLev3Rg(findLevelByParent(asAddrObj.getObjectid()));
@@ -110,7 +118,15 @@ public class AddressService {
 
 			} else if (asAddrObj.getLevel() == 1) {
 				gar.setIdlev1Pr(asAddrObj.getId());
-				gar.setLev2Pr(findLevelByParent(asAddrObj.getObjectid()));
+				if (asAddrObj.getTypename().equals("г")) {
+					gar.setIdlev2Pr(gar.getIdlev1Pr());
+					gar.setLev3Pr(findLevelByParent(asAddrObj.getObjectid()));
+					Collection<AsAddrObj> lev2Pr = new ArrayList<>();
+					lev2Pr.add(asAddrObj);
+					gar.setLev2Pr(lev2Pr);
+				} else {
+					gar.setLev2Pr(findLevelByParent(asAddrObj.getObjectid()));
+				}
 			} else if (asAddrObj.getLevel() > 1 && asAddrObj.getLevel() < 6) {
 				gar.setIdlev2Pr(asAddrObj.getId());
 				gar.setLev3Pr(findLevelByParent(asAddrObj.getObjectid()));
