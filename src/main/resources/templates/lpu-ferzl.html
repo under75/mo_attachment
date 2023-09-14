@@ -146,7 +146,7 @@
 						th:if="${#fields.hasErrors('searchParams')}"
 						th:errors="*{searchParams}"></div>
 					<div class="badge text-bg-info"
-						th:if="${dataPage.getContent().get(0).hasError == null}">Запрос
+						th:if="${dataPage.getContent().size() > 0 && dataPage.getContent().get(0).hasError == null}">Запрос
 						в ФЕРЗЛ отправлен. Дождитесь начала новой минуты, затем нажмите
 						кнопку "Обновить"</div>
 				</div>

@@ -13,7 +13,7 @@ public class RussiaMo implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Id
 	@Column(name = "mcod")
-	private Integer id;
+	private String id;
 	
 	@Column(name = "nam_mop")
 	private String fullName;
@@ -24,7 +24,7 @@ public class RussiaMo implements Serializable {
 	@Column(name = "addr_j")
 	private String address;
 
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
 
@@ -40,7 +40,7 @@ public class RussiaMo implements Serializable {
 		return address;
 	}
 
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

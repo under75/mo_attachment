@@ -208,7 +208,7 @@ public class LpuController {
 		} else if (attachLast != null && formParams.getMoName() == null) {
 			formParams.setMoName(lpuService.getById(attachLast.getLpuId()).getName());
 		} else if (attach != null) {
-			RussiaMo mo = russiaMoService.getById(Integer.valueOf(attach.getMocode()));
+			RussiaMo mo = russiaMoService.getById(attach.getMocode());
 			if (formParams.getMoName() == null && mo != null) {
 				formParams.setMoName(mo.getShortName());
 			}

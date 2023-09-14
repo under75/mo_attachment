@@ -15,7 +15,7 @@ public class RussiaMoService {
 		this.russiaMoRepository = russiaMoRepository;
 	}
 
-	public RussiaMo getById(Integer id) {
+	public RussiaMo getById(String id) {
 		return russiaMoRepository.getReferenceById(id);
 	}
 

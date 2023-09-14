@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import ru.sartfoms.moattach.entity.RussiaMo;
 
-public interface RussiaMoRepository extends JpaRepository<RussiaMo, Integer> {
+public interface RussiaMoRepository extends JpaRepository<RussiaMo, String> {
 
 }
