@@ -6,7 +6,8 @@
 		th:fragment="navbar">
 		<div class="container-fluid">
 			<span class="navbar-brand mb-0 h1">Учетное прикрепление к МО
-				лиц, застрахованных по ОМС за пределами Саратовской области </span>
+				лиц, застрахованных по ОМС за пределами Саратовской области </span><span class="h6"
+				th:text="'v' + ${@environment.getProperty('app.version')}" sec:authorize="isAnonymous()"></span>
 			<div class="d-flex flex-nowrap" sec:authorize="isAuthenticated()"> 
 				<a href="/help" target="_blank" sec:authorize="hasAuthority('lpu')"
 					class="btn btn-sm btn-outline-light">Справка</a>&nbsp;
