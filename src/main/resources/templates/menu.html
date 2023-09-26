@@ -4,9 +4,9 @@
 <body>
 	<nav class="navbar bg-primary" data-bs-theme="dark"
 		th:fragment="navbar">
-		<div class="container-fluid">
+		<div class="container">
 			<span class="navbar-brand mb-0 h1">Учетное прикрепление к МО
-				лиц, застрахованных по ОМС за пределами Саратовской области </span><span class="h6"
+				лиц, застрахованных по ОМС за пределами Саратовской области </span><span 
 				th:text="'v' + ${@environment.getProperty('app.version')}" sec:authorize="isAnonymous()"></span>
 			<div class="d-flex flex-nowrap" sec:authorize="isAuthenticated()"> 
 				<a href="/help" target="_blank" sec:authorize="hasAuthority('lpu')"

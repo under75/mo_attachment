@@ -17,7 +17,7 @@ import ru.sartfoms.moattach.util.DateValidator;
 
 @Service
 public class PersonDataService {
-	private static final Integer PAGE_SIZE = 10;
+	private static final Integer PAGE_SIZE = 12;
 	private final PersonDataRepository personDataRepository;
 
 	public PersonDataService(PersonDataRepository personDataRepository) {

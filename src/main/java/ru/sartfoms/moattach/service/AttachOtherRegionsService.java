@@ -23,7 +23,7 @@ import ru.sartfoms.moattach.util.DateValidator;
 
 @Service
 public class AttachOtherRegionsService {
-	private static final Integer PAGE_SIZE = 10;
+	private static final Integer PAGE_SIZE = 15;
 	private final AttachOtherRegionsRepository attachOtherRegionsRepository;
 	private final AttachOtherRegionsDao attachOtherRegionsDao;
 	private final LpuService lpuService;
