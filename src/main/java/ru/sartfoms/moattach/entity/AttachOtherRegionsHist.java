@@ -16,8 +16,8 @@ import javax.persistence.Table;
 public class AttachOtherRegionsHist {
 	@Id
 	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_sequence")
-	@SequenceGenerator(name = "id_sequence", sequenceName = "LPUOWNER.ATTACH_OTHERREGIONS_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ATTACH_OTHERREGIONS_SEQ")
+	@SequenceGenerator(name = "ATTACH_OTHERREGIONS_SEQ", sequenceName = "LPUOWNER.ATTACH_OTHERREGIONS_SEQ", allocationSize = 1)
 	private Long id;
 	@Column(name = "attachid")
 	private Long attachid;

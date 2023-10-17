@@ -26,6 +26,9 @@ public class User {
 	@Column(name = "u_lpu")
 	private Integer lpuId;
 	
+	@Column(name = "u_fam")
+	private String lastname;
+	
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "u_name", referencedColumnName = "u_name")
 	private Collection<Role> roles = new ArrayList<>();
@@ -60,6 +63,14 @@ public class User {
 
 	public void setRoles(Collection<Role> roles) {
 		this.roles = roles;
+	}
+
+	public String getLastname() {
+		return lastname;
+	}
+
+	public void setLastname(String lastname) {
+		this.lastname = lastname;
 	}
 
 }

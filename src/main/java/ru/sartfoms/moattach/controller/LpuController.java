@@ -73,6 +73,7 @@ import ru.sartfoms.moattach.service.SnilsService;
 import ru.sartfoms.moattach.service.UserService;
 import ru.sartfoms.moattach.service.WordService;
 import ru.sartfoms.moattach.util.DateValidator;
+import ru.sartfoms.moattach.util.Info;
 
 @Controller
 public class LpuController {
@@ -96,6 +97,8 @@ public class LpuController {
 	private final RussiaMoService russiaMoService;
 	@Autowired
 	SmartValidator validator;
+	@Autowired
+	Info info;
 
 	public LpuController(UserService userService, LpuService lpuService, DudlTypeService dudlTypeService,
 			PersonDataService personDataService, MPIErrorService mpiErrorService, PersonService personService,
@@ -122,6 +125,11 @@ public class LpuController {
 		this.wordService = wordService;
 		this.snilsService = snilsService;
 		this.russiaMoService = russiaMoService;
+	}
+	
+	@ModelAttribute
+	public void addInfoToModel(Model model) {
+		model.addAttribute("info", info);
 	}
 
 	@GetMapping("/lpu/ferzl")

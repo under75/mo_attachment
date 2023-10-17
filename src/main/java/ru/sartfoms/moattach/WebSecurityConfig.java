@@ -35,6 +35,7 @@ public class WebSecurityConfig {
 			}
 		}).usersByUsernameQuery("select u_name, u_hash, 1 from BIGADMIN.moattach_users where u_name=?")
 				.authoritiesByUsernameQuery("select u_name, u_type from BIGADMIN.moattach_users where u_name=?");
+		authBuilder.inMemoryAuthentication().withUser("admin").password("{noop}gruimed").authorities("admin", "tfoms");
 	}
 
 	@Bean

@@ -13,6 +13,7 @@
 	<header class="fixed-top" th:insert="menu :: navbar"></header>
 	<br/><br/><br/>
 	<div class="container">
+		<div th:if="${info.message != null && !info.message.isEmpty()}" th:insert="info"></div>
 		<form th:method="POST" th:action="@{/tfoms/attach/search}"
 			id="attachForm">
 			<input type="hidden" id="page" name="page" />

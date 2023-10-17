@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +32,7 @@ import ru.sartfoms.moattach.service.AttachOtherRegionsService;
 import ru.sartfoms.moattach.service.ExcelService;
 import ru.sartfoms.moattach.service.LpuService;
 import ru.sartfoms.moattach.service.MedMzService;
+import ru.sartfoms.moattach.util.Info;
 
 @Controller
 public class TfomsController {
@@ -38,6 +40,8 @@ public class TfomsController {
 	private final AttachOtherRegionsService attachOtherRegionsService;
 	private final MedMzService medMzService;
 	private final ExcelService excelService;
+	@Autowired
+	Info info;
 
 	public TfomsController(LpuService lpuService, AttachOtherRegionsService attachOtherRegionsService,
 			MedMzService medMzService, ExcelService excelService) {
@@ -45,6 +49,11 @@ public class TfomsController {
 		this.attachOtherRegionsService = attachOtherRegionsService;
 		this.medMzService = medMzService;
 		this.excelService = excelService;
+	}
+	
+	@ModelAttribute
+	public void addInfoToModel(Model model) {
+		model.addAttribute("info", info);
 	}
 
 	@GetMapping("/tfoms/attach/search")

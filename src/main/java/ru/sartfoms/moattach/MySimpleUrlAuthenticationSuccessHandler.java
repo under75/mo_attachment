@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -19,14 +20,24 @@ import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
+import ru.sartfoms.moattach.util.ActiveUserStore;
+import ru.sartfoms.moattach.util.LoggedUser;
+
 public class MySimpleUrlAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
 	protected Log logger = LogFactory.getLog(this.getClass());
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+	@Autowired
+    ActiveUserStore activeUserStore;
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException {
+		HttpSession session = request.getSession(false);
+        if (session != null) {
+            LoggedUser user = new LoggedUser(authentication.getName(), activeUserStore);
+            session.setAttribute("loggedUser", user);
+        }
 		handle(request, response, authentication);
 		clearAuthenticationAttributes(request);
 	}
@@ -56,6 +67,7 @@ public class MySimpleUrlAuthenticationSuccessHandler implements AuthenticationSu
 		Map<String, String> roleTargetUrlMap = new HashMap<>();
 		roleTargetUrlMap.put("lpu", "/lpu/ferzl");
 		roleTargetUrlMap.put("tfoms", "/tfoms/attach/search");
+		roleTargetUrlMap.put("admin", "/admin");
 
 		final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 		for (final GrantedAuthority grantedAuthority : authorities) {
