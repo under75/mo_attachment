@@ -7,8 +7,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import ru.sartfoms.moattach.entity.AttachOtherRegions;
+import ru.sartfoms.moattach.repository.custom.AttachOtherRegionsRepositoryCustom;
 
-public interface AttachOtherRegionsRepository extends JpaRepository<AttachOtherRegions, Long> {
+public interface AttachOtherRegionsRepository extends JpaRepository<AttachOtherRegions, Long>, AttachOtherRegionsRepositoryCustom {
 
 	AttachOtherRegions findByPcyNumAndExpDateAfterOrderByEffDateDesc(String pcyNum, LocalDate now);
 

@@ -21,6 +21,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -35,6 +36,7 @@ import ru.sartfoms.moattach.service.MedMzService;
 import ru.sartfoms.moattach.util.Info;
 
 @Controller
+@RequestMapping("/tfoms")
 public class TfomsController {
 	private final LpuService lpuService;
 	private final AttachOtherRegionsService attachOtherRegionsService;
@@ -56,7 +58,7 @@ public class TfomsController {
 		model.addAttribute("info", info);
 	}
 
-	@GetMapping("/tfoms/attach/search")
+	@GetMapping("/attach/search")
 	public String searchAttachment(Model model, HttpSession session) {
 		SearchFormParameters formParams = new SearchFormParameters();
 		model.addAttribute("formParams", formParams);
@@ -69,7 +71,7 @@ public class TfomsController {
 	}
 
 	@SuppressWarnings("unchecked")
-	@PostMapping("/tfoms/attach/search")
+	@PostMapping("/attach/search")
 	public String searchAttachment(Model model, @ModelAttribute("formParams") SearchFormParameters formParams,
 			BindingResult bindingResult, @RequestParam("page") Optional<Integer> page,
 			@RequestParam("excel") Optional<?> excel, HttpSession session) {
@@ -106,7 +108,7 @@ public class TfomsController {
 		return "tfoms-attach-search";
 	}
 
-	@PostMapping("/tfoms/attach/search/excel")
+	@PostMapping("/attach/search/excel")
 	@ResponseBody
 	public ResponseEntity<?> toExcel(Model model, @ModelAttribute("formParams") SearchFormParameters formParams,
 			@RequestParam("historical") Optional<?> historical) {
@@ -122,7 +124,7 @@ public class TfomsController {
 		return resource;
 	}
 
-	@GetMapping("/tfoms/attach/search/word")
+	@GetMapping("/attach/search/word")
 	@ResponseBody
 	public ResponseEntity<?> toWord(@RequestParam("attachId") Optional<Long> attachId) {
 		ResponseEntity<?> resource;

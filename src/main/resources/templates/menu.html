@@ -9,7 +9,7 @@
 				лиц, застрахованных по ОМС за пределами Саратовской области </span><span 
 				th:text="'v' + ${@environment.getProperty('app.version')}" sec:authorize="isAnonymous()"></span>
 			<div class="d-flex flex-nowrap" sec:authorize="isAuthenticated()"> 
-				<a href="/help" target="_blank" sec:authorize="hasAuthority('lpu')"
+				<a href="/lpu/help" target="_blank" sec:authorize="hasAuthority('lpu')"
 					class="btn btn-sm btn-outline-light">Справка</a>&nbsp;
 				<form th:action="@{/logout}" method="post">
 					<button type="submit" class="btn btn-sm btn-outline-light">Выход</button>

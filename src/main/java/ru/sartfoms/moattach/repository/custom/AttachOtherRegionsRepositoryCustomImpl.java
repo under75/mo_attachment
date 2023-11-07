@@ -1,4 +1,4 @@
-package ru.sartfoms.moattach.dao;
+package ru.sartfoms.moattach.repository.custom;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,11 +20,11 @@ import org.springframework.stereotype.Component;
 import ru.sartfoms.moattach.entity.AttachOtherRegions;
 
 @Component
-public class AttachOtherRegionsDao {
+public class AttachOtherRegionsRepositoryCustomImpl implements AttachOtherRegionsRepositoryCustom {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	public AttachOtherRegionsDao(EntityManager entityManager) {
+	public AttachOtherRegionsRepositoryCustomImpl(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
 
@@ -68,7 +68,7 @@ public class AttachOtherRegionsDao {
 		return new PageImpl<AttachOtherRegions>(query.getResultList(), page, totalRows);
 	}
 
-	public Collection<AttachOtherRegions> toCollection(Boolean historical, Collection<Integer> lpuIds, String lpuUnit,
+	public Collection<AttachOtherRegions> findByParams(Boolean historical, Collection<Integer> lpuIds, String lpuUnit,
 			String doctorSnils, LocalDate effDateMin, LocalDate effDateMax, String lastName, String firstName,
 			String patronymic, LocalDate birthday, String policyNum) {
 

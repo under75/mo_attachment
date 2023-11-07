@@ -13,13 +13,13 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.springframework.stereotype.Service;
 
-import ru.sartfoms.moattach.dao.AttachOtherRegionsDao;
 import ru.sartfoms.moattach.entity.AttachOtherRegions;
 import ru.sartfoms.moattach.entity.DudlType;
 import ru.sartfoms.moattach.entity.Lpu;
 import ru.sartfoms.moattach.exception.ExcelGeneratorException;
 import ru.sartfoms.moattach.model.AttachFormParameters;
 import ru.sartfoms.moattach.model.SearchFormParameters;
+import ru.sartfoms.moattach.repository.AttachOtherRegionsRepository;
 import ru.sartfoms.moattach.util.ExcelGenerator;
 
 @Service
@@ -28,15 +28,15 @@ public class ExcelService {
 	private final MedMzService medMzService;
 	private final DudlTypeService dudlTypeService;
 	private final AddressService addressService;
-	private final AttachOtherRegionsDao attachOtherRegionsDao;
+	private final AttachOtherRegionsRepository attachOtherRegionsRepository;
 
-	public ExcelService(AttachOtherRegionsDao attachOtherRegionsDao, MedMzService medMzService, LpuService lpuService,
-			DudlTypeService dudlTypeService, AddressService addressService) {
+	public ExcelService(MedMzService medMzService, LpuService lpuService, DudlTypeService dudlTypeService,
+			AddressService addressService, AttachOtherRegionsRepository attachOtherRegionsRepository) {
 		this.lpuService = lpuService;
 		this.medMzService = medMzService;
 		this.dudlTypeService = dudlTypeService;
 		this.addressService = addressService;
-		this.attachOtherRegionsDao = attachOtherRegionsDao;
+		this.attachOtherRegionsRepository = attachOtherRegionsRepository;
 	}
 
 	public InputStream createExcel(AttachFormParameters formParams) throws IOException, ExcelGeneratorException {
@@ -46,7 +46,7 @@ public class ExcelService {
 		Lpu lpu = lpuService.getById(formParams.getLpuId());
 		Collection<DudlType> dudlTypes = dudlTypeService.findAll();
 
-		return new ExcelGenerator(attachOtherRegionsDao.toCollection(formParams.getHistorical(),
+		return new ExcelGenerator(attachOtherRegionsRepository.findByParams(formParams.getHistorical(),
 				lpuService.getIdsForCriteriaBuilder(null, formParams.getLpuId()), formParams.getLpuUnit(),
 				formParams.getDoctorSnils(), effDateMin, effDateMax, null, null, null, null, null)) {
 
@@ -160,7 +160,7 @@ public class ExcelService {
 		LocalDate birthday = formParams.getBirthDay().isEmpty() ? null : LocalDate.parse(formParams.getBirthDay());
 		Collection<DudlType> dudlTypes = dudlTypeService.findAll();
 
-		return new ExcelGenerator(attachOtherRegionsDao.toCollection(formParams.getHistorical(),
+		return new ExcelGenerator(attachOtherRegionsRepository.findByParams(formParams.getHistorical(),
 				lpuService.getIdsForCriteriaBuilder(formParams.getMoId(), formParams.getLpuId()),
 				formParams.getLpuUnit(), formParams.getDoctorSnils(), effDateMin, effDateMax, formParams.getLastName(),
 				formParams.getFirstName(), formParams.getPatronymic(), birthday, formParams.getPolicyNum())) {

@@ -31,6 +31,7 @@ import org.springframework.validation.SmartValidator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -76,6 +77,7 @@ import ru.sartfoms.moattach.util.DateValidator;
 import ru.sartfoms.moattach.util.Info;
 
 @Controller
+@RequestMapping("/lpu")
 public class LpuController {
 	private final UserService userService;
 	private final LpuService lpuService;
@@ -132,7 +134,7 @@ public class LpuController {
 		model.addAttribute("info", info);
 	}
 
-	@GetMapping("/lpu/ferzl")
+	@GetMapping("/ferzl")
 	public String getPersonData(Model model) {
 
 		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -150,7 +152,7 @@ public class LpuController {
 		return "lpu-ferzl";
 	}
 
-	@PostMapping("/lpu/ferzl")
+	@PostMapping("/ferzl")
 	public String getPersonData(Model model, @ModelAttribute("searchParams") FerzlSearchParameters searchParams,
 			BindingResult bindingResult, @RequestParam("page") Optional<Integer> page) {
 
@@ -173,7 +175,7 @@ public class LpuController {
 		return "lpu-ferzl";
 	}
 
-	@PostMapping("/lpu/attach")
+	@PostMapping("/attach")
 	public String attachPersonToLpu(Model model, @ModelAttribute("gar") Gar gar, BindingResult bindingResult2,
 			@RequestParam("rid") Long rid, @ModelAttribute("formParams") AttachFormParameters formParams,
 			BindingResult bindingResult, @RequestParam("rgaddr") Optional<Integer> rgaddr,
@@ -314,7 +316,7 @@ public class LpuController {
 		return "lpu-attach";
 	}
 
-	@PostMapping("/lpu/attach/edit")
+	@PostMapping("/attach/edit")
 	public String editAttachment(Model model, @RequestParam("attachId") Optional<Long> attachId,
 			@ModelAttribute("gar") Gar gar, BindingResult bindingResult2,
 			@ModelAttribute("formParams") AttachFormParameters formParams, BindingResult bindingResult,
@@ -394,7 +396,7 @@ public class LpuController {
 		return "lpu-attach-edit";
 	}
 
-	@GetMapping("/lpu/attach/search")
+	@GetMapping("/attach/search")
 	public String searchAttachment(Model model, HttpSession session) {
 
 		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -435,7 +437,7 @@ public class LpuController {
 	}
 
 	@SuppressWarnings("unchecked")
-	@PostMapping("/lpu/attach/search")
+	@PostMapping("/attach/search")
 	public String searchAttachment(Model model, @ModelAttribute("formParams") AttachFormParameters formParams,
 			BindingResult bindingResult, @RequestParam("page") Optional<Integer> page,
 			@RequestParam("excel") Optional<?> excel, HttpSession session) {
@@ -482,7 +484,7 @@ public class LpuController {
 		return "lpu-attach-search";
 	}
 
-	@PostMapping("/lpu/attach/search/excel")
+	@PostMapping("/attach/search/excel")
 	@ResponseBody
 	public ResponseEntity<?> toExcel(Model model, @ModelAttribute("formParams") AttachFormParameters formParams,
 			@RequestParam("historical") Optional<?> historical) {
@@ -500,7 +502,7 @@ public class LpuController {
 		return resource;
 	}
 
-	@PostMapping("/lpu/attach/word")
+	@PostMapping("/attach/word")
 	@ResponseBody
 	public ResponseEntity<?> toWord(Model model, @ModelAttribute("formParams") AttachFormParameters formParams,
 			@ModelAttribute("gar") Gar gar, @RequestParam("rid") Long rid, HttpSession session) {

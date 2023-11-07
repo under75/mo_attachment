@@ -15,7 +15,7 @@ import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
 @Entity
-@Table(name = "mpi_dudl", schema = "ASY23")
+@Table(name = "mpi_dudl", schema = "OMCOWNER")
 @IdClass(CompositeKey.class)
 public class Dudl {
 	@Id

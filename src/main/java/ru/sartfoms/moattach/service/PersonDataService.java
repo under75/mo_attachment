@@ -14,6 +14,7 @@ import ru.sartfoms.moattach.entity.PersonData;
 import ru.sartfoms.moattach.model.FerzlSearchParameters;
 import ru.sartfoms.moattach.repository.PersonDataRepository;
 import ru.sartfoms.moattach.util.DateValidator;
+import static ru.sartfoms.moattach.util.Constants.*;
 
 @Service
 public class PersonDataService {
@@ -78,6 +79,7 @@ public class PersonDataService {
 			personData.setBirthDay(LocalDate.parse(searchParams.getBirthDay()));
 		personData.setUser(userName);
 		personData.setDtIns(LocalDateTime.now());
+		personData.setOwner(OWNER);
 
 		return personDataRepository.save(personData);
 	}
