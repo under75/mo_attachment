@@ -381,6 +381,8 @@ public class LpuController {
 				attachOtherRegionsService.save(attachOtherRegions);
 			}
 		} else if (edit.isPresent()) {
+			formParams.setChiefDoc("dummy for validator");
+			formParams.setRegDate("dummy for validator");
 			validator.validate(formParams, bindingResult);
 			validator.validate(gar, bindingResult2);
 			if (!bindingResult.hasErrors() && !bindingResult2.hasErrors()) {

@@ -27,12 +27,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import ru.sartfoms.moattach.entity.AttachOtherRegions;
 import ru.sartfoms.moattach.entity.Lpu;
+import ru.sartfoms.moattach.entity.VAttachOtherRegionsInsured;
 import ru.sartfoms.moattach.exception.ExcelGeneratorException;
 import ru.sartfoms.moattach.model.SearchFormParameters;
 import ru.sartfoms.moattach.service.AttachOtherRegionsService;
 import ru.sartfoms.moattach.service.ExcelService;
 import ru.sartfoms.moattach.service.LpuService;
 import ru.sartfoms.moattach.service.MedMzService;
+import ru.sartfoms.moattach.service.VAttachOtherRegionsInsuredService;
 import ru.sartfoms.moattach.util.Info;
 
 @Controller
@@ -42,17 +44,20 @@ public class TfomsController {
 	private final AttachOtherRegionsService attachOtherRegionsService;
 	private final MedMzService medMzService;
 	private final ExcelService excelService;
+	private final VAttachOtherRegionsInsuredService vAttachOtherRegionsInsuredService;
 	@Autowired
 	Info info;
 
 	public TfomsController(LpuService lpuService, AttachOtherRegionsService attachOtherRegionsService,
-			MedMzService medMzService, ExcelService excelService) {
+			MedMzService medMzService, ExcelService excelService,
+			VAttachOtherRegionsInsuredService vAttachOtherRegionsInsuredService) {
 		this.lpuService = lpuService;
 		this.attachOtherRegionsService = attachOtherRegionsService;
 		this.medMzService = medMzService;
 		this.excelService = excelService;
+		this.vAttachOtherRegionsInsuredService = vAttachOtherRegionsInsuredService;
 	}
-	
+
 	@ModelAttribute
 	public void addInfoToModel(Model model) {
 		model.addAttribute("info", info);
@@ -114,7 +119,9 @@ public class TfomsController {
 			@RequestParam("historical") Optional<?> historical) {
 		ResponseEntity<?> resource;
 		try {
-			resource = ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+ LocalDateTime.now().toString() +".xlsx")
+			resource = ResponseEntity.ok()
+					.header(HttpHeaders.CONTENT_DISPOSITION,
+							"attachment; filename=" + LocalDateTime.now().toString() + ".xlsx")
 					.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
 					.body(new InputStreamResource(excelService.createExcel(formParams)));
 		} catch (IOException | ExcelGeneratorException e) {
@@ -142,5 +149,32 @@ public class TfomsController {
 		}
 
 		return resource;
+	}
+
+	@GetMapping("/insured/search")
+	public String searchInsured(Model model) {
+		SearchFormParameters formParams = new SearchFormParameters();
+		model.addAttribute("formParams", formParams);
+
+		Collection<Lpu> mos = lpuService.findByParentId(0);
+		model.addAttribute("mos", mos);
+
+		return "tfoms-insured-search";
+	}
+
+	@PostMapping("/insured/search")
+	public String searchInsured(Model model, @ModelAttribute("formParams") SearchFormParameters formParams,
+			@RequestParam("page") Optional<Integer> page) {
+		Collection<Lpu> mos = lpuService.findByParentId(0);
+		model.addAttribute("mos", mos);
+
+		if (formParams.getMoId() != null) {
+			model.addAttribute("lpus", lpuService.findByParentId(formParams.getMoId()));
+		}
+
+		Page<VAttachOtherRegionsInsured> dataPage = vAttachOtherRegionsInsuredService.getDataPage(formParams, page);
+		model.addAttribute("dataPage", dataPage);
+		
+		return "tfoms-insured-search";
 	}
 }
