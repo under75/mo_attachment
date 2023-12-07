@@ -1,5 +1,7 @@
 package ru.sartfoms.moattach.controller;
 
+import static ru.sartfoms.moattach.util.Constants.OWNER_CRON;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +16,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import ru.sartfoms.moattach.entity.Address;
 import ru.sartfoms.moattach.entity.Attach;
@@ -97,6 +101,7 @@ public class LpuController {
 	private final WordService wordService;
 	private final SnilsService snilsService;
 	private final RussiaMoService russiaMoService;
+	private final WebClient client;
 	@Autowired
 	SmartValidator validator;
 	@Autowired
@@ -108,7 +113,8 @@ public class LpuController {
 			AttachService attachService, ContactService contactService, MedMzService medMzService,
 			AttachOtherRegionsService attachOtherRegionsService,
 			AttachOtherRegionsHistService attachOtherRegionsHistService, ExcelService excelService,
-			WordService wordService, SnilsService snilsService, RussiaMoService russiaMoService) {
+			WordService wordService, SnilsService snilsService, RussiaMoService russiaMoService,
+			@Value("${verzl.server.url}") String verzlServerUrl, @Value("${verzl.server.port}") int verzlServerPort) {
 		this.userService = userService;
 		this.lpuService = lpuService;
 		this.dudlTypeService = dudlTypeService;
@@ -127,8 +133,9 @@ public class LpuController {
 		this.wordService = wordService;
 		this.snilsService = snilsService;
 		this.russiaMoService = russiaMoService;
+		this.client = WebClient.create("http://" + verzlServerUrl + ":" + verzlServerPort);
 	}
-	
+
 	@ModelAttribute
 	public void addInfoToModel(Model model) {
 		model.addAttribute("info", info);
@@ -166,8 +173,14 @@ public class LpuController {
 			validator.validate(searchParams, bindingResult);
 		}
 
-		if (!bindingResult.hasErrors() && !page.isPresent())
-			personDataService.saveRequest(searchParams, user.getName());
+		if (!bindingResult.hasErrors() && !page.isPresent()) {
+			PersonData personData = personDataService.saveRequest(searchParams, user.getName());
+			client.get().uri("/persdata/" + personData.getRid()).retrieve().bodyToMono(Void.class)
+					.doOnError(throwable -> {
+						personData.setOwner(OWNER_CRON);
+						personDataService.save(personData);
+					}).subscribe();
+		}
 
 		Page<PersonData> dataPage = personDataService.getDataPage(searchParams, user.getName(), page);
 		model.addAttribute("dataPage", dataPage);
@@ -196,8 +209,7 @@ public class LpuController {
 
 		Collection<Lpu> lpus = new ArrayList<>();
 		lpus.add(lpu);
-		if (lpu.getParentId() == 0
-				&& user.getRoles().stream().anyMatch(t -> t.getRoleName().contains("admin"))) {
+		if (lpu.getParentId() == 0 && user.getRoles().stream().anyMatch(t -> t.getRoleName().contains("admin"))) {
 			lpus.addAll(lpuService.findByParentId(lpu.getId()));
 		}
 		model.addAttribute("lpus", lpus);
@@ -223,9 +235,10 @@ public class LpuController {
 				formParams.setMoName(mo.getShortName());
 			}
 		}
-		model.addAttribute("moNames", russiaMoService.findAll().stream().filter(t->t.getShortName().length() > 2).map(t->t.getShortName()).collect(Collectors.toSet()));
+		model.addAttribute("moNames", russiaMoService.findAll().stream().filter(t -> t.getShortName().length() > 2)
+				.map(t -> t.getShortName()).collect(Collectors.toSet()));
 		if (formParams.getSnils() == null) {
-			Snils snils = snilsService.findAllByRid(rid).stream().findAny().orElse(null); 
+			Snils snils = snilsService.findAllByRid(rid).stream().findAny().orElse(null);
 			formParams.setSnils(snils != null ? snils.getSnils() : null);
 		}
 		Collection<Contact> contacts = contactService.findByRid(rid);
@@ -337,8 +350,7 @@ public class LpuController {
 		if (lpu.getId().intValue() != attachedLpu.getId().intValue()) {
 			lpus.add(lpu);
 		}
-		if (lpu.getParentId() == 0
-				&& user.getRoles().stream().anyMatch(t -> t.getRoleName().contains("admin"))) {
+		if (lpu.getParentId() == 0 && user.getRoles().stream().anyMatch(t -> t.getRoleName().contains("admin"))) {
 			lpus.addAll(lpuService.findByParentId(lpu.getId()));
 		}
 		model.addAttribute("lpus", lpus);
@@ -407,8 +419,7 @@ public class LpuController {
 
 		Collection<Lpu> lpus = new ArrayList<>();
 		lpus.add(lpu);
-		if (lpu.getParentId() == 0
-				&& user.getRoles().stream().anyMatch(t -> t.getRoleName().contains("admin"))) {
+		if (lpu.getParentId() == 0 && user.getRoles().stream().anyMatch(t -> t.getRoleName().contains("admin"))) {
 			lpus.addAll(lpuService.findByParentId(lpu.getId()));
 		}
 		model.addAttribute("lpus", lpus);
@@ -450,8 +461,7 @@ public class LpuController {
 
 		Collection<Lpu> lpus = new ArrayList<>();
 		lpus.add(lpu);
-		if (lpu.getParentId() == 0
-				&& user.getRoles().stream().anyMatch(t -> t.getRoleName().contains("admin"))) {
+		if (lpu.getParentId() == 0 && user.getRoles().stream().anyMatch(t -> t.getRoleName().contains("admin"))) {
 			lpus.addAll(lpuService.findByParentId(lpu.getId()));
 		}
 		model.addAttribute("lpus", lpus);
@@ -525,9 +535,8 @@ public class LpuController {
 					lpu.getParentId().intValue() == 0 ? lpu.getId() : lpu.getParentId(), formParams.getDoctorSnils()));
 
 			session.setAttribute("worddoc",
-					IOUtils.toByteArray(
-							new InputStreamResource(wordService.createDoc(user, formParams, addrRgStr, addrPrStr,
-									addrMoStr, addrDateB, person, policy, dudl, lpu, doctor)).getInputStream()));
+					IOUtils.toByteArray(new InputStreamResource(wordService.createDoc(user, formParams, addrRgStr,
+							addrPrStr, addrMoStr, addrDateB, person, policy, dudl, lpu, doctor)).getInputStream()));
 
 			resource = ResponseEntity.ok()
 					.header(HttpHeaders.CONTENT_DISPOSITION,
@@ -543,7 +552,7 @@ public class LpuController {
 
 		return resource;
 	}
-	
+
 	@GetMapping(value = "/help", produces = { "application/octet-stream" })
 	public ResponseEntity<?> help() {
 		try {

@@ -79,7 +79,7 @@ public class PersonDataService {
 			personData.setBirthDay(LocalDate.parse(searchParams.getBirthDay()));
 		personData.setUser(userName);
 		personData.setDtIns(LocalDateTime.now());
-		personData.setOwner(OWNER);
+		personData.setOwner(OWNER_REST);
 
 		return personDataRepository.save(personData);
 	}
@@ -99,5 +99,9 @@ public class PersonDataService {
 
 	public PersonData getPersonDataByRid(Long rid) {
 		return personDataRepository.getReferenceById(rid);
+	}
+
+	public PersonData save(PersonData personData) {
+		return personDataRepository.save(personData);
 	}
 }
