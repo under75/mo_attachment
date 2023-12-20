@@ -193,8 +193,7 @@ public class LpuController {
 			@RequestParam("rid") Long rid, @ModelAttribute("formParams") AttachFormParameters formParams,
 			BindingResult bindingResult, @RequestParam("rgaddr") Optional<Integer> rgaddr,
 			@RequestParam("cntnr") Optional<Integer> cntnr, @RequestParam("nrdudl") Optional<Integer> nrdudl,
-			@RequestParam("save") Optional<String> save, @RequestParam("print") Optional<String> print,
-			HttpSession session) {
+			@RequestParam("save") Optional<String> save, @RequestParam("print") Optional<String> print) {
 
 		model.addAttribute("rid", rid);
 		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -310,9 +309,29 @@ public class LpuController {
 				if (print.isPresent()) {
 					return "forward:/lpu/attach/word";
 				}
+				String addrRgStr = addressService.getAddrRgStr(gar);
+				String addrPrStr = addressService.getAddrPrStr(gar);
+				String addrMoStr = addressService.getAddrMoStr(gar);
+				LocalDate addrDateB = addressService.findAddressDateB(gar, rid);
+				Dudl dudl = dudlService.findByRid(rid).stream()
+						.filter(t -> t.getDudlNum().equals(formParams.getDudlNum())).findAny().orElse(null);
+				lpu = lpuService.getById(formParams.getLpuId());
+				MedMz doctor = medMzService
+						.getById(new MedMzPk(lpu.getParentId().intValue() == 0 ? lpu.getId() : lpu.getParentId(),
+								formParams.getDoctorSnils()));
+				
+				byte[] worddoc = null;
+				try {
+					worddoc = IOUtils.toByteArray(new InputStreamResource(wordService.createDoc(user, formParams,
+							addrRgStr, addrPrStr, addrMoStr, addrDateB, person, policy, dudl, lpu, doctor)).getInputStream());
+				} catch (IllegalStateException | IOException e) {
+					e.printStackTrace();
+				}
+				
 				AttachOtherRegions attachOtherRegionsEff = attachOtherRegionsService.attach(user, formParams, gar,
-						person, policy, (byte[]) session.getAttribute("worddoc"));
+						person, policy, worddoc);
 				model.addAttribute("attachOtherRegions", attachOtherRegionsEff);
+					
 				if (attachOtherRegions != null) {
 					attachOtherRegions.setExpDate(attachOtherRegionsEff.getEffDate().minusDays(1));
 					attachOtherRegionsService.save(attachOtherRegions);
@@ -517,7 +536,7 @@ public class LpuController {
 	@PostMapping("/attach/word")
 	@ResponseBody
 	public ResponseEntity<?> toWord(Model model, @ModelAttribute("formParams") AttachFormParameters formParams,
-			@ModelAttribute("gar") Gar gar, @RequestParam("rid") Long rid, HttpSession session) {
+			@ModelAttribute("gar") Gar gar, @RequestParam("rid") Long rid) {
 		ResponseEntity<?> resource;
 		try {
 			User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -534,17 +553,14 @@ public class LpuController {
 			MedMz doctor = medMzService.getById(new MedMzPk(
 					lpu.getParentId().intValue() == 0 ? lpu.getId() : lpu.getParentId(), formParams.getDoctorSnils()));
 
-			session.setAttribute("worddoc",
-					IOUtils.toByteArray(new InputStreamResource(wordService.createDoc(user, formParams, addrRgStr,
-							addrPrStr, addrMoStr, addrDateB, person, policy, dudl, lpu, doctor)).getInputStream()));
-
 			resource = ResponseEntity.ok()
 					.header(HttpHeaders.CONTENT_DISPOSITION,
 							"attachment; filename=" + (policy.getEnp() != null ? policy.getEnp() : policy.getPcyNum())
 									+ ".docx")
 					.contentType(MediaType
 							.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
-					.body(session.getAttribute("worddoc"));
+					.body(IOUtils.toByteArray(new InputStreamResource(wordService.createDoc(user, formParams, addrRgStr,
+							addrPrStr, addrMoStr, addrDateB, person, policy, dudl, lpu, doctor)).getInputStream()));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

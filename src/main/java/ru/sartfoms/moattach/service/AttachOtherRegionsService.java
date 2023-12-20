@@ -58,10 +58,13 @@ public class AttachOtherRegionsService {
 			attachOtherRegions.setAoguidreg(
 					gar.getLev4Rg().stream().filter(t -> t.getId().longValue() == gar.getIdlev4Rg().longValue())
 							.findFirst().get().getObjectguid());
-		if (gar.getIdlev5Rg() != null)
-			attachOtherRegions.setHsguidreg(
-					gar.getLev5Rg().stream().filter(t -> t.getId().longValue() == gar.getIdlev5Rg().longValue())
+		else
+			attachOtherRegions.setAoguidreg(
+					gar.getLev3Rg().stream().filter(t -> t.getId().longValue() == gar.getIdlev3Rg().longValue())
 							.findFirst().get().getObjectguid());
+
+		attachOtherRegions.setHsguidreg(gar.getLev5Rg().stream()
+				.filter(t -> t.getId().longValue() == gar.getIdlev5Rg().longValue()).findFirst().get().getObjectguid());
 		if (gar.getLev4Pr() != null)
 			attachOtherRegions.setAoguidpr(
 					gar.getLev4Pr().stream().filter(t -> t.getId().longValue() == gar.getIdlev4Pr().longValue())
