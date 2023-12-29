@@ -1,0 +1,87 @@
+<div class="col-sm-6">
+	<table class="table table-sm">
+		<thead class="table-light">
+			<tr class="small">
+				<th class="w-75">Фактический адрес МО (выбор из ГАР)</th>
+				<th colspan="2" class="w-25">Фильтр</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev1Mo}"
+					class="form-select form-select-sm" onchange="requestMoGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev1Mo')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev1Mo}" th:value="${address.id}"
+							th:text="${address.name} +' ' + ${address.typename}"
+							th:selected="${gar.idlev1Mo}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev1Mo}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestMoGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev2Mo}"
+					class="form-select form-select-sm" onchange="requestMoGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev2Mo')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev2Mo}" th:value="${address.id}"
+							th:text="${address.name}+' ' + ${address.typename}"
+							th:selected="${gar.idlev2Mo}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev2Mo}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestMoGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev3Mo}"
+					class="form-select form-select-sm" onchange="requestMoGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev3Mo')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev3Mo}" th:value="${address.id}"
+							th:text="${address.name}+' ' + ${address.typename}"
+							th:selected="${gar.idlev3Mo}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev3Mo}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestMoGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr th:if="${gar.lev4Mo != null}" class="small">
+				<td><select th:field="*{gar.idlev4Mo}"
+					class="form-select form-select-sm" onchange="requestMoGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev4Mo')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev4Mo}" th:value="${address.id}"
+							th:text="${address.name}+' ' + ${address.typename}"
+							th:selected="${gar.idlev4Mo}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev4Mo}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestMoGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev5Mo}"
+					class="form-select form-select-sm" onchange="requestMoGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev5Mo')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev5Mo}" th:value="${address.id}"
+							th:text="${address.houseNum}+' ' + (${address.addNum1}?${address.addNum1}:'')+' ' + (${address.addNum2}?${address.addNum2}:'')"
+							th:selected="${gar.idlev5Mo}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev5Mo}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestMoGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+		</tbody>
+	</table>
+</div>

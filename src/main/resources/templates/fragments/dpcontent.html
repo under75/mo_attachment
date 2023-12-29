@@ -1,0 +1,18 @@
+<tr th:each="persData, iStat : ${dataPage.content}"
+	th:attr="data-rid=${persData.rid}, data-done=${persData.hasError != null}"
+	class='clickable-row small' style="cursor: pointer;"
+	onclick="goToResult(this.getAttribute('data-rid'), this.getAttribute('data-done'))"
+	th:classappend="|${persData.hasError != null && !persData.hasError ? 'table-success' : ''} ${persData.hasError != null && persData.hasError ? 'table-danger' : ''}|"
+	th:title="${persData.hasError != null && !persData.hasError ? 'Кликните для прикрепления' : 'Ошибка поиска'}">
+	<td
+		th:text="${#temporals.format(persData.dtIns, 'dd.MM.yyyy HH:mm:ss')}" />
+	<td th:text="${persData.pcy}" />
+	<td th:text="${persData.dudlSer}" />
+	<td th:text="${persData.dudlNum}" />
+	<td th:text="${#temporals.format(persData.birthDay, 'dd.MM.yyyy')}" />
+	<td th:text="${persData.lastName}" />
+	<td th:text="${persData.firstName}" />
+	<td><span th:text="${persData.patronymic}"></span><input
+		type="hidden" th:if="${iStat.first}" id="success"
+		th:attr="data-success=${success}" /></td>
+</tr>

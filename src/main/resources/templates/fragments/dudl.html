@@ -1,0 +1,32 @@
+<div class="col-sm-8">
+	<div class="form-group">
+		<label class="col-form-label col-form-label-sm" for="dudlType">Тип
+			ДУдЛ</label> <select id="dudlType" th:field="*{formParams.dudlType}"
+			class="form-select form-select-sm"
+			th:classappend="${#fields.hasErrors('formParams.dudlType')} ? 'is-invalid' : ''"
+			title="Обязательно к заполнению">
+			<option value=""></option>
+			<option th:each="dudlType : ${dudlTypes}"
+				th:value="${dudlType.docCode}" th:text="${dudlType.docName}"
+				th:selected="${formParams.dudlType}"></option>
+		</select>
+	</div>
+</div>
+<div class="col-sm">
+	<div class="form-group">
+		<label class="col-form-label col-form-label-sm" for="dudlSer">Серия
+			ДУдЛ</label> <input type="text" th:field="*{formParams.dudlSer}" id="dudlSer"
+			class="form-control form-control-sm"
+			th:classappend="${#fields.hasErrors('formParams.dudlSer')} ? 'is-invalid' : ''"
+			placeholder="серия" />
+	</div>
+</div>
+<div class="col-sm">
+	<div class="form-group">
+		<label class="col-form-label col-form-label-sm" for="dudlNum">Номер
+			ДУдЛ</label> <input type="text" th:field="*{formParams.dudlNum}" id="dudlNum"
+			class="form-control form-control-sm"
+			th:classappend="${#fields.hasErrors('formParams.dudlNum')} ? 'is-invalid' : ''"
+			placeholder="номер" title="Обязательно к заполнению" />
+	</div>
+</div>

@@ -12,10 +12,14 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import ru.sartfoms.moattach.interceptor.LoginPageInterceptor;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig {
+public class WebSecurityConfig implements WebMvcConfigurer {
 
 	@Autowired
 	private DataSource dataSource;
@@ -44,14 +48,19 @@ public class WebSecurityConfig {
 				.successHandler(myAuthenticationSuccessHandler());
 		http.authorizeRequests().antMatchers("/resources/**", "/static/**", "/webjars/**", "/help/**").permitAll()
 				.antMatchers("/tfoms/**").hasAnyAuthority("tfoms").antMatchers("/lpu/**").hasAnyAuthority("lpu")
-				.anyRequest().authenticated().and().formLogin().permitAll().and().logout().permitAll().and()
-				.exceptionHandling().accessDeniedPage("/403");
+				.antMatchers("/support/**").hasAnyAuthority("lpu", "tfoms").anyRequest().authenticated().and()
+				.formLogin().permitAll().and().logout().permitAll().and().exceptionHandling().accessDeniedPage("/403");
 		return http.build();
 	}
 
 	@Bean
 	public AuthenticationSuccessHandler myAuthenticationSuccessHandler() {
 		return new MySimpleUrlAuthenticationSuccessHandler();
+	}
+	
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(new LoginPageInterceptor());
 	}
 
 }

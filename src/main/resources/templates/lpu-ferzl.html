@@ -138,17 +138,18 @@
 				<div class="col-sm">
 					<input type="submit" value="Поиск" class="btn btn-sm btn-primary"
 						name="saveRequest" />&nbsp;<input type="button" value="Очистить"
-						onclick="location.href='/lpu/ferzl'"
-						class="btn btn-sm btn-secondary" />&nbsp;<input type="button"
-						value="Обновить" th:onclick="|goToPage(${dataPage.number + 1})|"
-						class="btn btn-sm btn-secondary" /><input type="hidden" id="page"
+						onclick="location.href='/lpu/ferzl?clear'"
+						class="btn btn-sm btn-secondary" />&nbsp;<input type="hidden" id="page"
 						name="page" />
 					<div class="badge text-bg-danger"
 						th:if="${#fields.hasErrors('searchParams')}"
 						th:errors="*{searchParams}"></div>
-					<div class="badge text-bg-info"
-						th:if="${dataPage.getContent().size() > 0 && dataPage.getContent().get(0).hasError == null}">Запрос
-						в ФЕРЗЛ отправлен, нажмите кнопку "Обновить"</div>
+					<div style="display: none;" id="spinner">
+						<div class="spinner-border spinner-border-sm" role="status">
+							<span class="visually-hidden">Waiting...</span>
+						</div>
+						<small>ожидание ответа от ФЕРЗЛ</small>
+					</div>
 				</div>
 			</div>
 			<hr />
@@ -166,24 +167,8 @@
 							<th>Отчество</th>
 						</tr>
 					</thead>
-					<tbody>
-						<tr th:each="persData, iStat : ${dataPage.content}"
-							th:attr="data-rid=${persData.rid}, data-done=${persData.hasError != null}"
-							class='clickable-row small' style="cursor: pointer;"
-							onclick="goToResult(this.getAttribute('data-rid'), this.getAttribute('data-done'))"
-							th:classappend="|${persData.hasError != null && !persData.hasError ? 'table-success' : ''} ${persData.hasError != null && persData.hasError ? 'table-danger' : ''}|"
-							th:title="${persData.hasError != null && !persData.hasError ? 'Кликните для прикрепления' : 'Ошибка поиска'}">
-							<td
-								th:text="${#temporals.format(persData.dtIns, 'dd.MM.yyyy HH:mm:ss')}" />
-							<td th:text="${persData.pcy}" />
-							<td th:text="${persData.dudlSer}" />
-							<td th:text="${persData.dudlNum}" />
-							<td
-								th:text="${#temporals.format(persData.birthDay, 'dd.MM.yyyy')}" />
-							<td th:text="${persData.lastName}" />
-							<td th:text="${persData.firstName}" />
-							<td th:text="${persData.patronymic}" />
-						</tr>
+					<tbody id="persdata">
+						<th:block th:insert="fragments/dpcontent.html"></th:block>
 					</tbody>
 				</table>
 				<nav aria-label="Pagination" th:if="${dataPage.totalPages gt 0}">
@@ -252,8 +237,31 @@
 				form.rid.value = rid;
 				form.submit();
 			} else {
-				alert("Подождите до начала новой минуты, затем нажмите кнопку \"Обновить\"");
+				alert("Для получения ответа нажмите кнопку \"Обновить\"");
 			}
+		}
+		window.onload = () => {
+			if (document.getElementById("success") != null && document.getElementById("success").getAttribute("data-success") == "false") {
+				document.getElementById('spinner').style.display = 'inline-block';
+				timerId = setInterval(function () {
+					requestData();
+				}, 1500);
+			}
+		}
+		const xhttp = new XMLHttpRequest();
+		function requestData() {
+			let form_data = new FormData(document.querySelector("#searchForm"));
+			let form_str = new URLSearchParams(form_data).toString();
+			xhttp.onload = function () {
+				 document.getElementById("persdata").innerHTML =
+				      this.responseText;
+				 if(document.getElementById("success").getAttribute("data-success") == "true") {
+				 	clearTimeout(timerId);
+				 	document.getElementById('spinner').style.display = 'none';
+				 }
+			}
+			xhttp.open("GET", "/lpu/persdata/data?" + form_str);
+			xhttp.send();
 		}
 	</script>
 	<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>

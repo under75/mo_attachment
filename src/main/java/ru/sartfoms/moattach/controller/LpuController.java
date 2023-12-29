@@ -142,18 +142,32 @@ public class LpuController {
 	}
 
 	@GetMapping("/ferzl")
-	public String getPersonData(Model model) {
+	public String getPersonData(Model model, @RequestParam("clear") Optional<?> clear, HttpSession session) {
+		if (clear.isPresent()) {
+			session.removeAttribute("personDataSeartchParams");
+			session.removeAttribute("personDataPage");
+		}
+
+		FerzlSearchParameters searchParams = (FerzlSearchParameters) session.getAttribute("personDataSeartchParams");
+		if (searchParams == null)
+			searchParams = new FerzlSearchParameters();
 
 		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
+		@SuppressWarnings("unchecked")
+		Page<PersonData> dataPage = (Page<PersonData>) session.getAttribute("personDataPage");
+		if (dataPage == null) {
+			Optional<Integer> page = Optional.of(1);
+			dataPage = personDataService.getDataPage(searchParams, user.getName(), page);
+		}
+		if (dataPage.getContent().stream().anyMatch(t -> t.getHasError() == null)) {
+			model.addAttribute("success", false);
+		} else {
+			model.addAttribute("success", true);
+		}
 		model.addAttribute("lpu", lpuService.getById(user.getLpuId()));
 		model.addAttribute("policyTypes", PolicyTypes.getInstance());
 		model.addAttribute("dudlTypes", dudlTypeService.findAll());
-
-		FerzlSearchParameters formParams = new FerzlSearchParameters();
-		model.addAttribute("searchParams", formParams);
-
-		Optional<Integer> page = Optional.of(1);
-		Page<PersonData> dataPage = personDataService.getDataPage(formParams, user.getName(), page);
+		model.addAttribute("searchParams", searchParams);
 		model.addAttribute("dataPage", dataPage);
 
 		return "lpu-ferzl";
@@ -161,7 +175,7 @@ public class LpuController {
 
 	@PostMapping("/ferzl")
 	public String getPersonData(Model model, @ModelAttribute("searchParams") FerzlSearchParameters searchParams,
-			BindingResult bindingResult, @RequestParam("page") Optional<Integer> page) {
+			BindingResult bindingResult, @RequestParam("page") Optional<Integer> page, HttpSession session) {
 
 		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
 		model.addAttribute("lpu", lpuService.getById(user.getLpuId()));
@@ -183,17 +197,45 @@ public class LpuController {
 		}
 
 		Page<PersonData> dataPage = personDataService.getDataPage(searchParams, user.getName(), page);
+		if (dataPage.getContent().stream().anyMatch(t -> t.getHasError() == null)) {
+			model.addAttribute("success", false);
+		} else {
+			model.addAttribute("success", true);
+		}
 		model.addAttribute("dataPage", dataPage);
 
+		session.setAttribute("personDataPage", dataPage);
+		session.setAttribute("personDataSeartchParams", searchParams);
+
 		return "lpu-ferzl";
+	}
+
+	@GetMapping("/persdata/data")
+	public String getContent(Model model, @ModelAttribute("searchParams") FerzlSearchParameters searchParams,
+			HttpSession session) {
+		String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+		@SuppressWarnings("unchecked")
+		int page = session.getAttribute("personDataPage") != null
+				? ((Page<PersonData>) session.getAttribute("personDataPage")).getNumber() + 1
+				: 1;
+		Page<PersonData> dataPage = personDataService.getDataPage(searchParams, userName, Optional.of(page));
+
+		if (dataPage.getContent().stream().anyMatch(t -> t.getHasError() == null)) {
+			model.addAttribute("success", false);
+		} else {
+			model.addAttribute("success", true);
+		}
+		model.addAttribute("dataPage", dataPage);
+		session.setAttribute("personDataPage", dataPage);
+
+		return "fragments/dpcontent";
 	}
 
 	@PostMapping("/attach")
 	public String attachPersonToLpu(Model model, @ModelAttribute("gar") Gar gar, BindingResult bindingResult2,
 			@RequestParam("rid") Long rid, @ModelAttribute("formParams") AttachFormParameters formParams,
-			BindingResult bindingResult, @RequestParam("rgaddr") Optional<Integer> rgaddr,
-			@RequestParam("cntnr") Optional<Integer> cntnr, @RequestParam("nrdudl") Optional<Integer> nrdudl,
-			@RequestParam("save") Optional<String> save, @RequestParam("print") Optional<String> print) {
+			BindingResult bindingResult, @RequestParam("save") Optional<String> save,
+			@RequestParam("print") Optional<String> print) {
 
 		model.addAttribute("rid", rid);
 		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -240,16 +282,10 @@ public class LpuController {
 			Snils snils = snilsService.findAllByRid(rid).stream().findAny().orElse(null);
 			formParams.setSnils(snils != null ? snils.getSnils() : null);
 		}
+
 		Collection<Contact> contacts = contactService.findByRid(rid);
 		model.addAttribute("contacts", contacts);
-		if (cntnr.isPresent()) {
-			Contact contact = contacts.stream().filter(t -> t.getNr().intValue() == cntnr.get().intValue()).findFirst()
-					.get();
-			if (contact.getContactType().contains("TEL"))
-				formParams.setPhone(contact.getContactText());
-			else if (contact.getContactType().contains("MAIL"))
-				formParams.setEmail(contact.getContactText());
-		}
+
 		Collection<Dudl> dudls;
 		try {
 			dudls = dudlService.findByRid(rid);
@@ -258,20 +294,10 @@ public class LpuController {
 		}
 		model.addAttribute("dudls", dudls);
 		model.addAttribute("dudlTypes", dudlTypeService.findAll());
-		if (nrdudl.isPresent()) {
-			Dudl dudl = dudls.stream().filter(t -> t.getNr().intValue() == nrdudl.get().intValue()).findFirst().get();
-			formParams.setDudlType(dudl.getDudlTypeStr());
-			formParams.setDudlSer(dudl.getDudlSer());
-			formParams.setDudlNum(dudl.getDudlNum());
-		}
 
 		Collection<Address> rgAddresses = addressService.findAllByRidAndAddressType(rid, AddressService.TYPE_RG);
 		model.addAttribute("rgAddresses", rgAddresses);
 
-		if (rgaddr.isPresent()) {
-			// initialize from FERZL by the registration address
-			addressService.initGarRgFromFerzl(gar, rgAddresses, rgaddr.get());
-		}
 		// set by UI
 		addressService.setGarLevels(gar);
 
@@ -319,19 +345,20 @@ public class LpuController {
 				MedMz doctor = medMzService
 						.getById(new MedMzPk(lpu.getParentId().intValue() == 0 ? lpu.getId() : lpu.getParentId(),
 								formParams.getDoctorSnils()));
-				
+
 				byte[] worddoc = null;
 				try {
-					worddoc = IOUtils.toByteArray(new InputStreamResource(wordService.createDoc(user, formParams,
-							addrRgStr, addrPrStr, addrMoStr, addrDateB, person, policy, dudl, lpu, doctor)).getInputStream());
+					worddoc = IOUtils.toByteArray(
+							new InputStreamResource(wordService.createDoc(user, formParams, addrRgStr, addrPrStr,
+									addrMoStr, addrDateB, person, policy, dudl, lpu, doctor)).getInputStream());
 				} catch (IllegalStateException | IOException e) {
 					e.printStackTrace();
 				}
-				
+
 				AttachOtherRegions attachOtherRegionsEff = attachOtherRegionsService.attach(user, formParams, gar,
 						person, policy, worddoc);
 				model.addAttribute("attachOtherRegions", attachOtherRegionsEff);
-					
+
 				if (attachOtherRegions != null) {
 					attachOtherRegions.setExpDate(attachOtherRegionsEff.getEffDate().minusDays(1));
 					attachOtherRegionsService.save(attachOtherRegions);
@@ -346,6 +373,84 @@ public class LpuController {
 		model.addAttribute("personAttached", personAttached);
 
 		return "lpu-attach";
+	}
+
+	@GetMapping("/mogar")
+	public String getGar(@ModelAttribute("gar") Gar gar) {
+		// set by UI
+		addressService.setGarLevels(gar);
+
+		return "fragments/mogar";
+	}
+
+	@GetMapping("/gar")
+	public String getGar(@ModelAttribute("gar") Gar gar, @RequestParam("rgaddr") Optional<Integer> rgaddr,
+			@RequestParam("rid") Long rid) {
+		if (rgaddr.isPresent()) {
+			// initialize from FERZL by the registration address
+			Collection<Address> rgAddresses = addressService.findAllByRidAndAddressType(rid, AddressService.TYPE_RG);
+			addressService.initGarRgFromFerzl(gar, rgAddresses, rgaddr.get());
+		}
+		// set by UI
+		addressService.setGarLevels(gar);
+
+		return "fragments/gar";
+	}
+
+	@GetMapping("/contact")
+	public String getContact(@ModelAttribute("formParams") AttachFormParameters formParams, BindingResult bindingResult,
+			@RequestParam("cntnr") Optional<Integer> cntnr, @RequestParam("rid") Long rid) {
+		if (cntnr.isPresent()) {
+			Collection<Contact> contacts = contactService.findByRid(rid);
+			Contact contact = contacts.stream().filter(t -> t.getNr().intValue() == cntnr.get().intValue()).findFirst()
+					.get();
+			if (contact.getContactType().contains("TEL"))
+				formParams.setPhone(contact.getContactText());
+			else if (contact.getContactType().contains("MAIL"))
+				formParams.setEmail(contact.getContactText());
+		}
+
+		return "fragments/contact";
+	}
+
+	@GetMapping("/dudl")
+	public String getDudl(Model model, @ModelAttribute("formParams") AttachFormParameters formParams,
+			@RequestParam("nrdudl") Optional<Integer> nrdudl, @RequestParam("rid") Long rid) {
+		if (nrdudl.isPresent()) {
+			Collection<Dudl> dudls;
+			try {
+				dudls = dudlService.findByRid(rid);
+			} catch (Exception e) {
+				dudls = new ArrayList<>();
+			}
+			Dudl dudl = dudls.stream().filter(t -> t.getNr().intValue() == nrdudl.get().intValue()).findFirst().get();
+			formParams.setDudlType(dudl.getDudlTypeStr());
+			formParams.setDudlSer(dudl.getDudlSer());
+			formParams.setDudlNum(dudl.getDudlNum());
+		}
+		model.addAttribute("dudlTypes", dudlTypeService.findAll());
+
+		return "fragments/dudl";
+	}
+
+	@GetMapping("/lpudoc")
+	public String getLpudoc(Model model, @ModelAttribute("formParams") AttachFormParameters formParams) {
+		User user = userService.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
+		Lpu lpu = lpuService.getById(user.getLpuId());
+		Collection<Lpu> lpus = new ArrayList<>();
+		lpus.add(lpu);
+		if (lpu.getParentId() == 0 && user.getRoles().stream().anyMatch(t -> t.getRoleName().contains("admin"))) {
+			lpus.addAll(lpuService.findByParentId(lpu.getId()));
+		}
+		Collection<MedMz> doctors = new ArrayList<MedMz>();
+		if (formParams.getLpuId() != null) {
+			Integer parentId = lpuService.getById(formParams.getLpuId()).getParentId();
+			doctors = medMzService.findByLpuId(parentId != 0 ? parentId : formParams.getLpuId());
+		}
+		model.addAttribute("doctors", doctors);
+		model.addAttribute("lpus", lpus);
+
+		return "fragments/lpudoc";
 	}
 
 	@PostMapping("/attach/edit")

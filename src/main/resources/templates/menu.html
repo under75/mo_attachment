@@ -11,6 +11,8 @@
 			<div class="d-flex flex-nowrap" sec:authorize="isAuthenticated()"> 
 				<a href="/lpu/help" target="_blank" sec:authorize="hasAuthority('lpu')"
 					class="btn btn-sm btn-outline-light">Справка</a>&nbsp;
+				<a href="/support/mail" sec:authorize="hasAnyAuthority('lpu','tfoms')"
+					class="btn btn-sm btn-outline-light">Поддержка</a>&nbsp;
 				<form th:action="@{/logout}" method="post">
 					<button type="submit" class="btn btn-sm btn-outline-light">Выход</button>
 				</form>

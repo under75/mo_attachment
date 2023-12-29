@@ -1,0 +1,16 @@
+<div class="col-sm">
+	<div class="form-group">
+		<label class="col-form-label col-form-label-sm" for="phone">Телефон<span
+			class="badge text-bg-info">при наличии</span></label><input type="text"
+			class="form-control form-control-sm" th:field="*{formParams.phone}"
+			th:classappend="${#fields.hasErrors('formParams.phone')} ? 'is-invalid' : ''" />
+	</div>
+</div>
+<div class="col-sm">
+	<div class="form-group">
+		<label class="col-form-label col-form-label-sm" for="email">Email<span
+			class="badge text-bg-info">при наличии</span></label><input type="text"
+			class="form-control form-control-sm" th:field="*{formParams.email}"
+			th:classappend="${#fields.hasErrors('formParams.email')} ? 'is-invalid' : ''" />
+	</div>
+</div>

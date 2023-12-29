@@ -1,0 +1,35 @@
+<div class="col-sm">
+	<div class="form-group">
+		<label class="col-form-label col-form-label-sm" for="lpuSar">Прикрепить
+			к медицинской организации / подразделению</label> <select id="lpuSar"
+			th:field="*{formParams.lpuId}" class="form-select form-select-sm"
+			th:classappend="${#fields.hasErrors('formParams.lpuId')} ? 'is-invalid' : ''"
+			title="Обязательно к заполнению" onchange="requestLpudoc()">
+			<option value=""></option>
+			<option th:each="lpu : ${lpus}" th:value="${lpu.id}"
+				th:text="${lpu.name}" th:selected="${formParams.lpuId}"></option>
+		</select>
+	</div>
+</div>
+<div class="col-sm-1">
+	<div class="form-group">
+		<label class="col-form-label col-form-label-sm" for="lpuUnit">№
+			участка</label> <input id="lpuUnit" th:field="*{formParams.lpuUnit}"
+			class="form-control form-control-sm"
+			th:classappend="${#fields.hasErrors('formParams.lpuUnit')} ? 'is-invalid' : ''"
+			title="Обязательно к заполнению" />
+	</div>
+</div>
+<div class="col-sm-4">
+	<div class="form-group">
+		<label class="col-form-label col-form-label-sm" for="doctorSnils">ФИО
+			врача</label> <select id="doctorSnils" th:field="*{formParams.doctorSnils}"
+			class="form-select form-select-sm"
+			th:classappend="${#fields.hasErrors('formParams.doctorSnils')} ? 'is-invalid' : ''"
+			title="Обязательно к заполнению">
+			<option value=""></option>
+			<option th:each="doctor : ${doctors}" th:value="${doctor.snils}"
+				th:text="${doctor.lastName} +' '+${doctor.firstName} + ' '+${doctor.patronymic}"></option>
+		</select>
+	</div>
+</div>

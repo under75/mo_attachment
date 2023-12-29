@@ -1,0 +1,174 @@
+<div class="col-sm">
+	<table class="table table-sm">
+		<thead class="table-light">
+			<tr class="small">
+				<th class="w-75">Адрес регистрации (выбор из ГАР)</th>
+				<th colspan="2" class="w-25">Фильтр</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev1Rg}"
+					class="form-select form-select-sm" onchange="requestGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev1Rg')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev1Rg}" th:value="${address.id}"
+							th:text="${address.name} +' ' + ${address.typename}"
+							th:selected="${gar.idlev1Rg}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev1Rg}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev2Rg}"
+					class="form-select form-select-sm" onchange="requestGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev2Rg')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev2Rg}" th:value="${address.id}"
+							th:text="${address.name}+' ' + ${address.typename}"
+							th:selected="${gar.idlev2Rg}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev2Rg}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev3Rg}"
+					class="form-select form-select-sm" onchange="requestGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev3Rg')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev3Rg}" th:value="${address.id}"
+							th:text="${address.name}+' ' + ${address.typename}"
+							th:selected="${gar.idlev3Rg}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev3Rg}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr th:if="${gar.lev4Rg != null}" class="small">
+				<td><select th:field="*{gar.idlev4Rg}"
+					class="form-select form-select-sm" onchange="requestGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev4Rg')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev4Rg}" th:value="${address.id}"
+							th:text="${address.name}+' ' + ${address.typename}"
+							th:selected="${gar.idlev4Rg}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev4Rg}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev5Rg}"
+					class="form-select form-select-sm" onchange="requestGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev5Rg')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev5Rg}" th:value="${address.id}"
+							th:text="${address.houseNum}+' ' + (${address.addNum1}?${address.addNum1}:'')+' ' + (${address.addNum2}?${address.addNum2}:'')"
+							th:selected="${gar.idlev5Rg}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev5Rg}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<div class="col-sm">
+	<table class="table table-sm">
+		<thead class="table-light">
+			<tr class="small">
+				<th class="w-75">Адрес проживания (выбор из ГАР)</th>
+				<th colspan="2" class="w-25">Фильтр</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev1Pr}"
+					class="form-select form-select-sm" onchange="requestGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev1Pr')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev1Pr}" th:value="${address.id}"
+							th:text="${address.name} +' ' + ${address.typename}"
+							th:selected="${gar.idlev1Pr}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev1Pr}"
+					class="form-control form-control-sm" readonly /></td>
+				<td><input type="button" value="Фильтр" onclick="requestGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev2Pr}"
+					class="form-select form-select-sm" onchange="requestGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev2Pr')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev2Pr}" th:value="${address.id}"
+							th:text="${address.name}+' ' + ${address.typename}"
+							th:selected="${gar.idlev2Pr}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev2Pr}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev3Pr}"
+					class="form-select form-select-sm" onchange="requestGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev3Pr')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev3Pr}" th:value="${address.id}"
+							th:text="${address.name}+' ' + ${address.typename}"
+							th:selected="${gar.idlev3Pr}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev3Pr}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr th:if="${gar.lev4Pr != null}" class="small">
+				<td><select th:field="*{gar.idlev4Pr}"
+					class="form-select form-select-sm" onchange="requestGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev4Pr')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev4Pr}" th:value="${address.id}"
+							th:text="${address.name}+' ' + ${address.typename}"
+							th:selected="${gar.idlev4Pr}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev4Pr}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+			<tr class="small">
+				<td><select th:field="*{gar.idlev5Pr}"
+					class="form-select form-select-sm" onchange="requestGar()"
+					th:classappend="${#fields.hasErrors('gar.idlev5Pr')} ? 'is-invalid' : ''"
+					title="Обязательно к заполнению">
+						<option value=""></option>
+						<option th:each="address : ${gar.lev5Pr}" th:value="${address.id}"
+							th:text="${address.houseNum}+' ' + (${address.addNum1}?${address.addNum1}:'')+' ' + (${address.addNum2}?${address.addNum2}:'')"
+							th:selected="${gar.idlev5Pr}"></option>
+				</select></td>
+				<td><input type="text" th:field="*{gar.flev5Pr}"
+					class="form-control form-control-sm" /></td>
+				<td><input type="button" value="Фильтр" onclick="requestGar()"
+					class="btn btn-sm btn-light" /></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
